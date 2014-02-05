@@ -1,46 +1,14 @@
-.ftz-notification_box_holder
-{
-position: absolute;
+.ftz-invalid {
+    background-color: #FFE6E6;
 }
 
-
-.ftz-notification_box 
-{
-position: relative;
-width: 200px;
-height: 20px;
-padding: 0px;
-background: #FFD8D5;
--webkit-border-radius: 10px;
--moz-border-radius: 10px;
-border-radius: 10px;
-border: #000000 solid 1px;
+div.ui-datepicker{
+    font-size: 11px;
 }
 
-.ftz-notification_box:after 
-{
-content: '';
-position: absolute;
-border-style: solid;
-border-width: 7px 5px 0;
-border-color: #FFD8D5 transparent;
-display: block;
-width: 0;
-z-index: 1;
-bottom: -7px;
-left: 35px;
-}
-
-.ftz-notification_box:before 
-{
-content: '';
-position: absolute;
-border-style: solid;
-border-width: 7px 5px 0;
-border-color: #000000 transparent;
-display: block;
-width: 0;
-z-index: 0;
-bottom: -8px;
-left: 35px;
-}
+  .ui-autocomplete {
+    max-height: 180px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+  }

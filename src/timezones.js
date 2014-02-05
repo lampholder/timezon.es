@@ -93,18 +93,40 @@ $.widget("ftz._timezoneRow", {
         this._dateInput = $('<input />', {'class': 'ftz-date_input'});
         this._timeInput = $('<input />', {'class': 'ftz-time_input'});
         this._dstComment = $('<span />', {'class': 'ftz-dst_comment'});
-        this._notificationBox = $('<span />', {'class': 'ftz-notification_box'}).hide();
+
+        // For fuck's sake - datepicker and timezone-js's date format strings don't match up.
+        this._dateInput.datepicker({ dateFormat: 'yy-mm-dd' }); //this._ftz().options.dateFormat
+        this._dateInput.change(function() {self._pushChanges();});
+
+        var source = function(){
+            var times = [];
+            for (var h = 0; h < 24; h++) {
+                for (var m = 0; m < 60; m += 15) {
+                    times.push( ('00' + h).slice (-2) + ':' + ('00' + m).slice(-2) );
+                }
+            }
+            return times;
+        }();
+        this._timeInput.autocomplete({ source: source,
+                                       minLength: 0,
+                                       select: function(event, ui) {
+                                           //self._timeInput.val(ui.label);
+                                           //self._pushChanges();
+                                       },
+                                       change: function() {
+                                           self._pushChanges();
+                                       } });
+        this._timeInput.on('focus click', function() {
+            self._timeInput.autocomplete('search', '');
+        });
 
         this.element.addClass('ftz-row');
         this.element.append($('<td />').append(this._cityName))
                     .append($('<td />').append(this._dateInput))
-                    .append($('<td />').append(this._timeInput)
-                        .append($('<span />', {'class': 'ftz-notification_box_holder'})
-                            .append(this._notificationBox)))
+                    .append($('<td />').append(this._timeInput))
                     .append($('<td />').append(this._dstComment));
 
-        this._dateInput.change(function() {self._pushChanges();});
-        this._timeInput.change(function() {self._pushChanges();});
+
 
         this._ftz().element.on('timechanged', function() {
             self.refresh();
@@ -130,8 +152,6 @@ $.widget("ftz._timezoneRow", {
         this._cityName.text(city.name + ' (' + city.tz + ')');
         var localDatetime = this.getLocalDatetime();
 
-        var fuckwoot = this._ftz();
-
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
         this._timeInput.val(localDatetime.format(this._ftz().options.timeFormat));
         this._dstComment.text(this._getDSTComment(localDatetime));
@@ -140,10 +160,6 @@ $.widget("ftz._timezoneRow", {
     },
     moment: function() {
         return this._ftz().moment();
-    },
-    notify: function(message, timeInMillis) {
-        this._notificationBox.text(message);
-        this._notificationBox.show();
     },
     _ftz: function() {
         return this.element.closest('table').data('ftz-timezoneTable');
@@ -176,13 +192,20 @@ $.widget("ftz._timezoneRow", {
         newMoment.millisecond(sourceMoment.millisecond());
 
         if(sourceMoment.hour() !== newMoment.hour() || sourceMoment.minute() !== newMoment.minute()) {
-            this.notify('Invalid date in timezone');
+            this.element.addClass('ftz-invalid');
+            this.element.effect('highlight', {color: '#FF4D4D'}, 450);
+            this._dstComment.text('This time does not exist in this time zone.');
         }
         else {
+            if (this.element.hasClass('ftz-invalid')) {
+                this.element.removeClass('ftz-invalid');
+                this.element.effect('highlight', {color: '#FFE6E6'}, 180);
+            }
             this._ftz().moment(newMoment);
         }
     },
     _getDSTComment: function(localDatetime) {
+        return 'this is expensive; need to cache'
         var dst = DST.getNextDSTEvent(localDatetime);
         if (dst.eventType === 'NO_DST') {
             return 'This territory does not operate daylight savings.'
