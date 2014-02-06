@@ -110,8 +110,12 @@ $.widget("ftz._timezoneRow", {
         this._timeInput.autocomplete({ source: source,
                                        minLength: 0,
                                        select: function(event, ui) {
-                                           //self._timeInput.val(ui.label);
-                                           //self._pushChanges();
+                                           this.value = ui.item.value;
+
+                                           // afaik this is the only way to trigger the change event programatically and not have it
+                                           // trigger again when the original element actually loses focus :S
+                                           self._timeInput.blur();
+                                           self._timeInput.focus();
                                        },
                                        change: function() {
                                            self._pushChanges();
@@ -125,8 +129,6 @@ $.widget("ftz._timezoneRow", {
                     .append($('<td />').append(this._dateInput))
                     .append($('<td />').append(this._timeInput))
                     .append($('<td />').append(this._dstComment));
-
-
 
         this._ftz().element.on('timechanged', function() {
             self.refresh();
