@@ -69,6 +69,8 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
     // https://github.com/moment/moment-timezone/issues/11
     // https://github.com/moment/moment-timezone/pull/25
 
+    return moment.tz(timeString, timeZone);
+
 	var sourceMoment = moment.utc(timeString, format);
     
     var newMoment = moment.tz('2010-01-28 11:00:00', timeZone);
