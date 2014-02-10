@@ -21,7 +21,7 @@ $.widget("ftz.timezoneTable", {
         self.moment().seconds(0).milliseconds(0);
 
         this.element.addClass('ftz-table')
-             .append('<thead><tr><th>Location</th><th>Date</th><th>Time</th><th>Local daylight savings</th></tr></thead>')
+             .append('<thead><tr><th>Location</th><th>Date</th><th>Time</th><th>Offset</th><th>Local daylight savings</th></tr></thead>')
              .append('<tfoot><tr><td id=\'ftz-add_city\'></td><td></td><td></td><td></td></tr></tfoot>');
         var addCityCell = this.element.find('#ftz-add_city');
         var tableHead = this.element.first('thead');
@@ -92,6 +92,7 @@ $.widget("ftz._timezoneRow", {
         this._cityName = $('<span />', {'class': 'ftz-city_name'});
         this._dateInput = $('<input />', {'class': 'ftz-date_input'});
         this._timeInput = $('<input />', {'class': 'ftz-time_input'});
+        this._timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'});
         this._dstComment = $('<span />', {'class': 'ftz-dst_comment'});
 
         // For fuck's sake - datepicker and timezone-js's date format strings don't match up.
@@ -128,6 +129,7 @@ $.widget("ftz._timezoneRow", {
         this.element.append($('<td />').append(this._cityName))
                     .append($('<td />').append(this._dateInput))
                     .append($('<td />').append(this._timeInput))
+                    .append($('<td />').append(this._timeZoneOffset))
                     .append($('<td />').append(this._dstComment));
 
         this._ftz().element.on('timechanged', function() {
@@ -156,6 +158,7 @@ $.widget("ftz._timezoneRow", {
 
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
         this._timeInput.val(localDatetime.format(this._ftz().options.timeFormat));
+        this._timeZoneOffset.text(localDatetime.format('Z'));
         this._dstComment.text(this._getDSTComment(localDatetime));
 
         return this;
@@ -171,28 +174,27 @@ $.widget("ftz._timezoneRow", {
         var date_format = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
         var tz = this.city().tz;
 
-        // Awaiting the next release of moment.js:
-        // https://github.com/moment/moment-timezone/issues/11
-        // https://github.com/moment/moment-timezone/pull/25
-        var sourceMoment = moment(date_string, date_format);
-        var newMoment = moment.tz(tz);
-        newMoment.year(sourceMoment.year());
-        newMoment.month(sourceMoment.month());
-        newMoment.date(sourceMoment.date());
+        if (!DST.timeExists(date_string, tz, date_format)) {
+            this.element.addClass('ftz-invalid');
+            this.element.effect('highlight', {color: '#FF4D4D'}, 450);
+            this._dstComment.text('This time does not exist in this time zone, monkeyface.');
+            return;
+        }
+        var ambiguity = DST.timeIsAmbiguous(date_string, tz, date_format);
+        if (ambiguity) {
+            this.element.addClass('ftz-invalid');
+            this.element.effect('highlight', {color: '#FF4D4D'}, 450);
+            this._dstComment.text('This time is ambiguous between.' + ambiguity[0] + ' and ' + ambiguity[1]);
+            return;            
+        }
+
+        if (this.element.hasClass('ftz-invalid')) {
+            this.element.removeClass('ftz-invalid');
+            this.element.effect('highlight', {color: '#FFE6E6'}, 180);
+        }
+        this._ftz().moment(DST.createTimeInTimezone(date_string, tz, date_format));
+
         /*
-            // You have to call .hour() twice to achieve the result you want regardless of timezone :()
-            var x = moment.tz('2014-03-09 12:00:00', 'America/Los_Angeles')
-            x.format() // "2014-03-09T05:00:00-07:00"
-            x.hour(1).format() // "2014-03-09T00:00:00-08:00"
-            x.hour(1).format() // "2014-03-09T01:00:00-08:00"
-        */
-        newMoment.hour(sourceMoment.hour());
-        newMoment.hour(sourceMoment.hour()); 
-
-        newMoment.minute(sourceMoment.minute());
-        newMoment.second(sourceMoment.second());
-        newMoment.millisecond(sourceMoment.millisecond());
-
         if(sourceMoment.hour() !== newMoment.hour() || sourceMoment.minute() !== newMoment.minute()) {
             this.element.addClass('ftz-invalid');
             this.element.effect('highlight', {color: '#FF4D4D'}, 450);
@@ -205,6 +207,7 @@ $.widget("ftz._timezoneRow", {
             }
             this._ftz().moment(newMoment);
         }
+        */
     },
     _getDSTComment: function(localDatetime) {
         return 'this is expensive; need to cache'
