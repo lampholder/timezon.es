@@ -34,16 +34,19 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 	});
 
 	if (foundDSTEvent) {
-		//return {'moment': iterator.add(1, 'minutes'), 'eventType': initialDSTState ? 'BACK' : 'FORWARD'}
 		return {'before': moment(iterator), 'after': moment(iterator.add(1, 'minutes')), 'eventType': initialDSTState ? 'BACK' : 'FORWARD'}
 	}
 	return {'before': null, 'after': null, 'eventType': 'NO_DST'};
 };
 
 DST.timeExists = function(timeString, timeZone, format) {
-	var utcTime = moment.utc(timeString, format);
-	var timeZonedTime = DST.createTimeInTimezone(timeString, timeZone, format);
-	return utcTime.format('HHmm') === timeZonedTime.format('HHmm');
+	try {
+		var timeZonedTime = DST.createTimeInTimezone(timeString, timeZone, format);
+		return true;
+	}
+	catch (e) {
+		return false;
+	}
 }
 
 DST.timeIsAmbiguous = function(timeString, timeZone, format) {
@@ -68,19 +71,33 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
 	// Awaiting the next release of moment.js:
     // https://github.com/moment/moment-timezone/issues/11
     // https://github.com/moment/moment-timezone/pull/25
+    var a = moment.utc(timeString);
+	var newMoment = moment.utc('1970-01-01 00:00:00')
+				   		  .tz(timeZone)
+						  .year(a.year())
+						  .month(a.month())
+						  .date(a.date())
+						  .hour(a.hour())
+						  .minute(a.minute())
+				 		  .second(a.second());
 
-    return moment.tz(timeString, timeZone);
+	// OH GOD none of this should be necessary D:
+	if (newMoment.hour() != a.hour()) {
+		var increment = newMoment.hour() < a.hour() ? 10 : -10;
+		for (var i = 0; i < 6; i++) {
+			if (newMoment.hour() != a.hour()) {
+				newMoment.add('minutes', increment);
+			}
+			else break;			
+		}
+		newMoment.minute(a.minute());
+	}
 
-	var sourceMoment = moment.utc(timeString, format);
-    
-    var newMoment = moment.tz('2010-01-28 11:00:00', timeZone);
-    newMoment.millisecond(sourceMoment.millisecond());
-    newMoment.second(sourceMoment.second());
-    newMoment.minute(sourceMoment.minute());
-    newMoment.hour(sourceMoment.hour());
-    newMoment.date(sourceMoment.date());
-    newMoment.month(sourceMoment.month());
-    newMoment.year(sourceMoment.year());
+	if (newMoment.format('YYYY-MM-DD HH:mm:ss') !== timeString) {
+    	throw new Error('Fuck nuggets:' + newMoment.format('YYYY-MM-DD HH:mm:ss') + ' did not match ' + timeString);
+    }
+
+    return newMoment;
 
     /*
     var offset = newMoment.format('Z');
@@ -103,6 +120,4 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
     */
     //newMoment.hour(sourceMoment.hour()); 
 
-
-    return newMoment;
 }

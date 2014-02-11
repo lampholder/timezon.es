@@ -170,7 +170,7 @@ $.widget("ftz._timezoneRow", {
         return this.element.closest('table').data('ftz-timezoneTable');
     },
     _pushChanges: function() {
-        var date_string = this._dateInput.val() + ' ' + this._timeInput.val();
+        var date_string = this._dateInput.val() + ' ' + this._timeInput.val() + ':00';
         var date_format = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
         var tz = this.city().tz;
 
