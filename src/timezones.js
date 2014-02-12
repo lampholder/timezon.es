@@ -3,7 +3,7 @@
 
 $.widget("ftz.timezoneTable", {
     options: {
-        timezones: [],
+        cities: [],
         dateFormat: 'YYYY-MM-DD',
         timeFormat: 'HH:mm',
         _moment: moment.utc(),
@@ -59,6 +59,10 @@ $.widget("ftz.timezoneTable", {
             self.addRow(city);
             selector.select2('val', null);
         });
+
+        $.each(this.options.cities, function(index, value) {
+            self.addRow(value);
+        });
     },
     addRow: function(city) {
         var newRow = $('<tr />');
@@ -92,7 +96,11 @@ $.widget("ftz._timezoneRow", {
         this._cityName = $('<span />', {'class': 'ftz-city_name'});
         this._dateInput = $('<input />', {'class': 'ftz-date_input'});
         this._timeInput = $('<input />', {'class': 'ftz-time_input'});
-        this._timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'});
+        var _timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'})._offset();
+        _timeZoneOffset.on('change', function() {self._pushChanges();});
+
+        this._timeZoneOffset = _timeZoneOffset.data('ftz-_offset');
+
         this._dstComment = $('<span />', {'class': 'ftz-dst_comment'});
 
         // For fuck's sake - datepicker and timezone-js's date format strings don't match up.
@@ -129,7 +137,7 @@ $.widget("ftz._timezoneRow", {
         this.element.append($('<td />').append(this._cityName))
                     .append($('<td />').append(this._dateInput))
                     .append($('<td />').append(this._timeInput))
-                    .append($('<td />').append(this._timeZoneOffset))
+                    .append($('<td />').append(_timeZoneOffset))
                     .append($('<td />').append(this._dstComment));
 
         this._ftz().element.on('timechanged', function() {
@@ -158,10 +166,18 @@ $.widget("ftz._timezoneRow", {
 
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
         this._timeInput.val(localDatetime.format(this._ftz().options.timeFormat));
-        this._timeZoneOffset.text(localDatetime.format('Z'));
+        this._timeZoneOffset.offsets(this._getValidOffsets()).choose(localDatetime.format('Z'));
         this._dstComment.text(this._getDSTComment(localDatetime));
 
         return this;
+    },
+    _getValidOffsets: function() {
+        var localDatetime = this.getLocalDatetime();
+        var ambiguity = DST.timeIsAmbiguous(localDatetime.format('YYYY-MM-DD HH:mm') + ':00', this.city().tz);
+        if (ambiguity) {
+            return ambiguity;
+        }
+        else return [localDatetime.format('Z')];
     },
     moment: function() {
         return this._ftz().moment();
@@ -180,13 +196,12 @@ $.widget("ftz._timezoneRow", {
             this._dstComment.text('This time does not exist in this time zone, monkeyface.');
             return;
         }
+
         var ambiguity = DST.timeIsAmbiguous(date_string, tz, date_format);
         if (ambiguity) {
-            this.element.addClass('ftz-invalid');
-            this.element.effect('highlight', {color: '#FF4D4D'}, 450);
-            this._dstComment.text('This time is ambiguous between.' + ambiguity[0] + ' and ' + ambiguity[1]);
-            return;            
-        }
+            this._ftz().moment(moment(date_string + ' ' + this._timeZoneOffset.val()));
+            return;
+        }      
 
         if (this.element.hasClass('ftz-invalid')) {
             this.element.removeClass('ftz-invalid');
@@ -194,20 +209,6 @@ $.widget("ftz._timezoneRow", {
         }
         this._ftz().moment(DST.createTimeInTimezone(date_string, tz, date_format));
 
-        /*
-        if(sourceMoment.hour() !== newMoment.hour() || sourceMoment.minute() !== newMoment.minute()) {
-            this.element.addClass('ftz-invalid');
-            this.element.effect('highlight', {color: '#FF4D4D'}, 450);
-            this._dstComment.text('This time does not exist in this time zone.');
-        }
-        else {
-            if (this.element.hasClass('ftz-invalid')) {
-                this.element.removeClass('ftz-invalid');
-                this.element.effect('highlight', {color: '#FFE6E6'}, 180);
-            }
-            this._ftz().moment(newMoment);
-        }
-        */
     },
     _getDSTComment: function(localDatetime) {
         return 'this is expensive; need to cache'
@@ -219,10 +220,9 @@ $.widget("ftz._timezoneRow", {
             return 'Clocks will go ' + dst.eventType + ' in this territory at ' + dst.moment.format('YYYY-MM-DD HH:mm:ss') + ' local time.';
         }
     }
-    
 });
 
-$.widget( "ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
+$.widget("ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
     getLocalDatetime: function() {
         return this.moment().local();
     },
@@ -232,6 +232,74 @@ $.widget( "ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
         var new_moment = moment(date_string, date_format);
         this._ftz().moment(new_moment);
     },
+    _getValidOffsets: function() {
+        var localDatetime = this.getLocalDatetime();
+        //var ambiguity = DST.timeIsAmbiguous(localDatetime.format('YYYY-MM-DD HH:mm'), city.tz);
+        //if (ambiguity) {
+        //    return ambiguity;
+        //}
+        //else 
+        return [localDatetime.format('Z')];
+    }
+});
+
+$.widget('ftz._offset', {
+    options: {
+        offsets: []
+    },
+    _init: function () {
+        this.element.empty();
+
+        this._select = $('<select />');
+        this._text = $('<span />').hide();
+
+        this.element.append(this._select);
+        this.element.append(this._text);
+    },
+    refresh: function () {
+        if (this.offsets().length === 0) {
+            this._text.text('±--:--');
+            this._text.show();
+            this._select.hide();
+        }
+        else if (this.offsets().length === 1) {
+            this._text.text(this.offsets()[0]);
+            this._text.show();
+            this._select.hide();
+        }
+        else {
+            this._select.empty();
+
+            var self = this;
+            $.each(this.offsets(), function(index, val) {
+                self._select.append($('<option />', {'value': val, 'text': val}));
+            });
+            this._text.hide();
+            this._select.show();
+        }
+    },
+    offsets: function(offsets) {
+        if (undefined === offsets) {
+            return this.options.offsets;
+        }
+        else {
+            this.options.offsets = offsets;
+            this.refresh();
+            return this;
+        }
+    },
+    choose: function(choice) {
+        this._select.val(choice);
+    },
+    val: function() {
+        if (this.offsets().length == 0) {
+            return undefined;
+        }
+        else if (this.offsets().length == 1) {
+            return this.offsets()[0];
+        }
+        else return this._select.val();
+    }
 });
 
 })();
@@ -239,5 +307,5 @@ $.widget( "ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
 
 
 $(function() {
-    $('#test').timezoneTable();
+    $('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
 });
