@@ -12,3 +12,7 @@ div.ui-datepicker{
     /* prevent horizontal scrollbar */
     overflow-x: hidden;
   }
+
+  .ftz-loading {
+    color: lightgray;
+  }

@@ -61,14 +61,20 @@ $.widget("ftz.timezoneTable", {
         });
 
         $.each(this.options.cities, function(index, value) {
-            self.addRow(value);
+            self._addRow(value);
         });
     },
     addRow: function(city) {
+        this.options.cities.push(city);
+        var newRow = this._addRow(city);
+        this.element.trigger('citieschanged', [city, this.options.cities]); // This isn't working
+        return newRow;
+    },
+    _addRow: function(city) {
         var newRow = $('<tr />');
         this.element.append(newRow);
         var timezoneRow = newRow._timezoneRow({'city': city});
-        return newRow;
+        return newRow;        
     },
     moment: function(value) {
         if (undefined === value) {
@@ -167,7 +173,13 @@ $.widget("ftz._timezoneRow", {
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
         this._timeInput.val(localDatetime.format(this._ftz().options.timeFormat));
         this._timeZoneOffset.offsets(this._getValidOffsets()).choose(localDatetime.format('Z'));
-        this._dstComment.text(this._getDSTComment(localDatetime));
+
+        var self = this;
+        self._dstComment.addClass('ftz-loading');
+        setTimeout(function() {
+            self._dstComment.removeClass('ftz-loading');
+            self._dstComment.text(self._getDSTComment(localDatetime));
+        }, 1);
 
         return this;
     },
@@ -211,13 +223,14 @@ $.widget("ftz._timezoneRow", {
 
     },
     _getDSTComment: function(localDatetime) {
-        return 'this is expensive; need to cache'
         var dst = DST.getNextDSTEvent(localDatetime);
         if (dst.eventType === 'NO_DST') {
             return 'This territory does not operate daylight savings.'
         }
         else {
-            return 'Clocks will go ' + dst.eventType + ' in this territory at ' + dst.moment.format('YYYY-MM-DD HH:mm:ss') + ' local time.';
+            var clocksGoForwardTime = moment.utc(dst.before.format('YYYY-MM-DD HH:mm:ss')).add('minutes', 1);
+            var dateTimeFormat = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
+            return 'At ' + clocksGoForwardTime.format(dateTimeFormat) + ' local time, clocks in this territory will roll ' + dst.eventType + ' to ' + dst.after.format(dateTimeFormat);
         }
     }
 });
@@ -234,11 +247,6 @@ $.widget("ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
     },
     _getValidOffsets: function() {
         var localDatetime = this.getLocalDatetime();
-        //var ambiguity = DST.timeIsAmbiguous(localDatetime.format('YYYY-MM-DD HH:mm'), city.tz);
-        //if (ambiguity) {
-        //    return ambiguity;
-        //}
-        //else 
         return [localDatetime.format('Z')];
     }
 });
@@ -307,5 +315,10 @@ $.widget('ftz._offset', {
 
 
 $(function() {
-    $('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
+    //$('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
+    var test = $.cookie('cities');
+    $('#test').timezoneTable({'cities': $.cookie('cities')});
+    $('#test').on('citieschanged', function (e, city, cities) {
+        $.cookie('cities', cities);
+    });
 });

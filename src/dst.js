@@ -1,5 +1,15 @@
 var DST = {};
 
+DST._cache = {};
+DST._cache.values = {};
+DST._cache.read = function(startDate, endDate) {
+	var tz = startDate.tz() || 'BROWSER_LOCAL';
+	if (DST._cache.values[tz] === undefined) {
+		return undefined;
+	}
+	
+};
+
 DST.getNextDSTEvent = function(startDate, endDate) {
 	"use strict";
 
@@ -82,14 +92,18 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
 				 		  .second(a.second());
 
 	// OH GOD none of this should be necessary D:
-	if (newMoment.hour() != a.hour()) {
-		var increment = newMoment.hour() < a.hour() ? 10 : -10;
+	// This _should_ cope with any DST shift fuckupery in multiples of 10 (hopefully only 60 or 30 minute shifts exist)
+	if (newMoment.format('HHmm') != a.format('HHmm')) {
+		var increment = newMoment.format('HHmm') < a.format('HHmm') ? 10 : -10;
 		for (var i = 0; i < 6; i++) {
 			if (newMoment.hour() != a.hour()) {
 				newMoment.add('minutes', increment);
 			}
 			else break;			
 		}
+
+		// This usually just resets the minute value, but for 01:15 in 2014-04-06 in Lord Howe, just seting the 
+		//  minutes value twice to the same thing is what 'fixes' the bug that initially sets the time to 01:45...
 		newMoment.minute(a.minute());
 	}
 
@@ -98,26 +112,5 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
     }
 
     return newMoment;
-
-    /*
-    var offset = newMoment.format('Z');
-	for (var i = 0; i < 3; i++) {
-		newMoment.hour(sourceMoment.hour());
-		if (offset !== newMoment.format('Z')) {
-			offset = newMoment.foramt('Z');
-			alert ('donkeypop');
-			throw Error('This thing is donkey poop - this time is ambuguous.');
-		}
-	}
-	*/
-
-    /*
-    // You have to call .hour() twice to achieve the result you want regardless of timezone :()
-    var x = moment.tz('2014-03-09 12:00:00', 'America/Los_Angeles')
-    x.format() // "2014-03-09T05:00:00-07:00"
-    x.hour(1).format() // "2014-03-09T00:00:00-08:00"
-    x.hour(1).format() // "2014-03-09T01:00:00-08:00"
-    */
-    //newMoment.hour(sourceMoment.hour()); 
 
 }
