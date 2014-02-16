@@ -316,7 +316,7 @@ $.widget('ftz._offset', {
 
 $(function() {
     //$('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
-    var cities = $.cookie('cities') || [];
+    var cities = JSON.parse($.cookie('cities') || "[]");
     $('#test').timezoneTable({'cities': cities});
     $('#test').on('citieschanged', function (e, city, cities) {
         $.cookie('cities', JSON.stringify(cities));
