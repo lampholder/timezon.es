@@ -319,6 +319,6 @@ $(function() {
     var test = $.cookie('cities');
     $('#test').timezoneTable({'cities': JSON.parse($.cookie('cities'))});
     $('#test').on('citieschanged', function (e, city, cities) {
-        $.cookie('cities', JSON.stringify(cities);
+        $.cookie('cities', JSON.stringify(cities));
     });
 });
