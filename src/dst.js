@@ -7,7 +7,7 @@ DST._cache.read = function(startDate, endDate) {
 	if (DST._cache.values[tz] === undefined) {
 		return undefined;
 	}
-	
+
 };
 
 DST.getNextDSTEvent = function(startDate, endDate) {
@@ -32,7 +32,7 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 	}
 
 	var initialDSTState = iterator.isDST();
-	var foundDSTEvent = ['months', 'days', 'hours', 'minutes'].every(function(increment) {
+	var foundDSTEvent = ['months', 'days', 'hours'].every(function(increment) {
 		while (iterator <= endDate && iterator.isDST() == initialDSTState) {
 			iterator.add(1, increment);
 		}
@@ -42,11 +42,23 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 		}
 		else return false;
 	});
-
 	if (foundDSTEvent) {
-		return {'before': moment(iterator), 'after': moment(iterator.add(1, 'minutes')), 'eventType': initialDSTState ? 'BACK' : 'FORWARD'}
+		// Minutes at which we discover we've switched to/from DST are 0, 1, 30, 31, 60
+		var eventType = initialDSTState ? 'BACK' : 'FORWARD';
+		var minutes = iterator.minutes();
+		if ((minutes == 0 && initialDSTState !== iterator.add('minutes',1).isDST())
+		 ||	(minutes <= 29 && initialDSTState !== iterator.add('minutes',(29 - minutes)).isDST())
+		 || initialDSTState !== iterator.add('minutes',(30 - minutes)).isDST()) {
+		 	return {'before': moment(iterator).add(-1, 'minutes'), 
+		 			'after': iterator, 
+		 			'eventType': eventType, 
+		 			'toString': function() {
+		 				return 'TYPE:[' + this.eventType 
+		 						+ ']; BEFORE:[' + this.before.format() 
+		 						+ ']; AFTER:[' + this.after.format() + '];';}};
+		}
 	}
-	return {'before': null, 'after': null, 'eventType': 'NO_DST'};
+	return {'before': null, 'after': null, 'eventType': 'NO_DST', 'toString': function() {return 'TYPE: [' + this.eventType + ']; BEFORE: [null]; AFTER: [null];'}};
 };
 
 DST.timeExists = function(timeString, timeZone, format) {
