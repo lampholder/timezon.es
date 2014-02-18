@@ -42,23 +42,30 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 		}
 		else return false;
 	});
-	if (foundDSTEvent) {
-		// Minutes at which we discover we've switched to/from DST are 0, 1, 30, 31, 60
-		var eventType = initialDSTState ? 'BACK' : 'FORWARD';
-		var minutes = iterator.minutes();
-		if ((minutes == 0 && initialDSTState !== iterator.add('minutes',1).isDST())
-		 ||	(minutes <= 29 && initialDSTState !== iterator.add('minutes',(29 - minutes)).isDST())
-		 || initialDSTState !== iterator.add('minutes',(30 - minutes)).isDST()) {
-		 	return {'before': moment(iterator).add(-1, 'minutes'), 
-		 			'after': iterator, 
-		 			'eventType': eventType, 
+
+	var dstEvent = {'before': null,
+		 			'after': null, 
+		 			'eventType': 'NO_DST', 
 		 			'toString': function() {
 		 				return 'TYPE:[' + this.eventType 
 		 						+ ']; BEFORE:[' + this.before.format() 
 		 						+ ']; AFTER:[' + this.after.format() + '];';}};
-		}
+
+	if (foundDSTEvent) {
+		// Minutes at which we discover we've switched to/from DST are 0, 1, 30, 31, 60
+		var minutes = [0, 1, 30, 31, 60].filter(function(minute) { return minute > iterator.minutes(); });
+		minutes.every(function(minutesToAdd) {
+			if (initialDSTState !== iterator.add('minutes', minutesToAdd - iterator.minutes()).isDST()) {
+				dstEvent.before = moment(iterator).add(-1, 'minutes');
+				dstEvent.after = iterator;
+				dstEvent.eventType = initialDSTState ? 'BACK' : 'FORWARD';
+
+				return false;
+			}
+			return true;
+		});
 	}
-	return {'before': null, 'after': null, 'eventType': 'NO_DST', 'toString': function() {return 'TYPE: [' + this.eventType + ']; BEFORE: [null]; AFTER: [null];'}};
+	return dstEvent;
 };
 
 DST.timeExists = function(timeString, timeZone, format) {

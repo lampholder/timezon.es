@@ -181,6 +181,11 @@ $.widget("ftz._timezoneRow", {
             self._dstComment.text(self._getDSTComment(localDatetime));
         }, 1);
 
+        if (this.element.hasClass('ftz-invalid')) {
+            this.element.removeClass('ftz-invalid');
+            this.element.effect('highlight', {color: '#FFE6E6'}, 180);
+        }
+
         return this;
     },
     _getValidOffsets: function() {
@@ -205,7 +210,7 @@ $.widget("ftz._timezoneRow", {
         if (!DST.timeExists(date_string, tz, date_format)) {
             this.element.addClass('ftz-invalid');
             this.element.effect('highlight', {color: '#FF4D4D'}, 450);
-            this._dstComment.text('This time does not exist in this time zone, monkeyface.');
+            this._dstComment.text('This time does not exist in this time zone.');
             return;
         }
 
@@ -215,10 +220,6 @@ $.widget("ftz._timezoneRow", {
             return;
         }      
 
-        if (this.element.hasClass('ftz-invalid')) {
-            this.element.removeClass('ftz-invalid');
-            this.element.effect('highlight', {color: '#FFE6E6'}, 180);
-        }
         this._ftz().moment(DST.createTimeInTimezone(date_string, tz, date_format));
 
     },
