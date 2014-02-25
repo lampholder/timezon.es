@@ -21,14 +21,14 @@ $.widget("ftz.timezoneTable", {
         self.moment().seconds(0).milliseconds(0);
 
         this.element.addClass('ftz-table')
-             .append('<thead><tr><th>Location</th><th>Date</th><th>Time</th><th>Offset</th><th>Local daylight savings</th></tr></thead>')
-             .append('<tfoot><tr><td id=\'ftz-add_city\'></td><td></td><td></td><td></td></tr></tfoot>');
+             .append('<thead><tr><th></th><th>Location</th><th>Date</th><th>Time</th><th>Offset</th><th>Local daylight savings</th></tr></thead>')
+             .append('<tfoot><tr><td></td><td id=\'ftz-add_city\'></td><td></td><td></td><td></td></tr></tfoot>');
         var addCityCell = this.element.find('#ftz-add_city');
         var tableHead = this.element.first('thead');
 
         var browserLocalTimeRow = $('<tr />');
         tableHead.append(browserLocalTimeRow);
-        browserLocalTimeRow._localBrowserTimezoneRow({'city': {'id': -1, 'name': 'Browser local time ', 'tz': 'UTC ' + moment().format('ZZ')}});
+        browserLocalTimeRow._localBrowserTimezoneRow(); //{'city': {'id': -1, 'name': 'Browser local time ', 'tz': 'UTC ' + moment().format('ZZ')}});
 
         var selector = $('<span/>', {'id': 'ftz-selector', 'width': '200px;'});
         addCityCell.append(selector);
@@ -89,7 +89,7 @@ $.widget("ftz.timezoneTable", {
 
 $.widget("ftz._timezoneRow", {
     options: {
-        city: ''
+        city: undefined
     },
     _init: function() {
         if (this.element.prop('tagName').toLowerCase() !== 'tr' ) {
@@ -140,7 +140,8 @@ $.widget("ftz._timezoneRow", {
         });
 
         this.element.addClass('ftz-row');
-        this.element.append($('<td />').append(this._cityName))
+        this.element.append($('<td />').append(this._getGrabber()))
+                    .append($('<td />').append(this._cityName))
                     .append($('<td />').append(this._dateInput))
                     .append($('<td />').append(this._timeInput))
                     .append($('<td />').append(_timeZoneOffset))
@@ -165,9 +166,15 @@ $.widget("ftz._timezoneRow", {
     getLocalDatetime: function() {
         return this.moment().tz(this.city().tz);
     },
-    refresh: function() {
+    _getCityName: function() {
         var city = this.city();
-        this._cityName.text(city.name + ' (' + city.tz + ')');
+        if (undefined === city) {
+            throw Error('This should not happen');
+        }
+        return city.name + ' (' + city.tz + ')';
+    },
+    refresh: function() {
+        this._cityName.text(this._getCityName());
         var localDatetime = this.getLocalDatetime();
 
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
@@ -202,10 +209,13 @@ $.widget("ftz._timezoneRow", {
     _ftz: function() {
         return this.element.closest('table').data('ftz-timezoneTable');
     },
+    _getTimezone: function() {
+        return this.city() && this.city().tz;
+    },
     _pushChanges: function() {
         var date_string = this._dateInput.val() + ' ' + this._timeInput.val() + ':00';
         var date_format = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
-        var tz = this.city().tz;
+        var tz = this._getTimezone();
 
         if (!DST.timeExists(date_string, tz, date_format)) {
             this.element.addClass('ftz-invalid');
@@ -218,7 +228,7 @@ $.widget("ftz._timezoneRow", {
         if (ambiguity) {
             this._ftz().moment(moment(date_string + ' ' + this._timeZoneOffset.val()));
             return;
-        }      
+        }
 
         this._ftz().moment(DST.createTimeInTimezone(date_string, tz, date_format));
 
@@ -233,6 +243,9 @@ $.widget("ftz._timezoneRow", {
             var dateTimeFormat = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
             return 'At ' + clocksGoForwardTime.format(dateTimeFormat) + ' local time, clocks in this territory will roll ' + dst.eventType + ' to ' + dst.after.format(dateTimeFormat);
         }
+    },
+    _getGrabber: function() {
+        return $('<span />', {'class': 'ftz-grabspan'});
     }
 });
 
@@ -240,16 +253,29 @@ $.widget("ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
     getLocalDatetime: function() {
         return this.moment().local();
     },
+    /*
     _pushChanges: function() {
         var date_string = this._dateInput.val() + ' ' + this._timeInput.val();
         var date_format = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
         var new_moment = moment(date_string, date_format);
         this._ftz().moment(new_moment);
     },
+    */
+    _getCityName: function() {
+        return 'Browser local time (UTC ' + moment().format('ZZ') + ')';
+    },
+    _getGrabber: function() {
+        return null;
+    },
     _getValidOffsets: function() {
+        // TODO: Refactor our the copy pasta; the whole concept of browser-specific/country-specific should be streamlined
         var localDatetime = this.getLocalDatetime();
-        return [localDatetime.format('Z')];
-    }
+        var ambiguity = DST.timeIsAmbiguous(localDatetime.format('YYYY-MM-DD HH:mm') + ':00');
+        if (ambiguity) {
+            return ambiguity;
+        }
+        else return [localDatetime.format('Z')];
+    },
 });
 
 $.widget('ftz._offset', {

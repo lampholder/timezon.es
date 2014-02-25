@@ -16,3 +16,12 @@ div.ui-datepicker{
   .ftz-loading {
     color: lightgray;
   }
+
+  .ftz-table .ftz-grabspan {
+    width: 16px;
+    height: 16px;
+    display: block;
+    background-image: url('grab.png');
+    background-repeat: no-repeat;
+
+  }

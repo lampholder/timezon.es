@@ -1,5 +1,6 @@
 var DST = {};
 
+/*
 DST._cache = {};
 DST._cache.values = {};
 DST._cache.read = function(startDate, endDate) {
@@ -9,6 +10,7 @@ DST._cache.read = function(startDate, endDate) {
 	}
 
 };
+*/
 
 DST.getNextDSTEvent = function(startDate, endDate) {
 	"use strict";
@@ -32,6 +34,10 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 	}
 
 	var initialDSTState = iterator.isDST();
+	// June, July, August and December are universally not used as DST switch months.
+	// Also, DST only switches on Thursday, Friday, Saturday and Sunday
+	// http://en.wikipedia.org/wiki/Daylight_saving_time_by_country
+
 	var foundDSTEvent = ['months', 'days', 'hours'].every(function(increment) {
 		while (iterator <= endDate && iterator.isDST() == initialDSTState) {
 			iterator.add(1, increment);
@@ -69,6 +75,9 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 };
 
 DST.timeExists = function(timeString, timeZone, format) {
+	if (undefined === timeZone) {
+		return moment(timeString).format(format) === moment.utc(timeString).format(format);
+	}
 	try {
 		var timeZonedTime = DST.createTimeInTimezone(timeString, timeZone, format);
 		return true;
@@ -79,8 +88,13 @@ DST.timeExists = function(timeString, timeZone, format) {
 }
 
 DST.timeIsAmbiguous = function(timeString, timeZone, format) {
+	if (undefined !== timeZone) {
+		var timeZonedTime = DST.createTimeInTimezone(timeString, timeZone, format);
+	}
+	else {
+		var timeZonedTime = moment(timeString);
+	}
 	//var utcTime = moment.utc(timeString, format); // No timezone info - this is strictly cosmetic
-	var timeZonedTime = DST.createTimeInTimezone(timeString, timeZone, format);
 	var startOfDay = moment(timeZonedTime).startOf('day');
 	var endOfDay = moment(timeZonedTime).add('days', 1);
 	var dstToday = DST.getNextDSTEvent(startOfDay, endOfDay);
@@ -97,6 +111,9 @@ DST.timeIsAmbiguous = function(timeString, timeZone, format) {
 }
 
 DST.createTimeInTimezone = function(timeString, timeZone, format) {
+	if (undefined === timeZone) {
+		return moment(timeString, format);
+	}
 	// Awaiting the next release of moment.js:
     // https://github.com/moment/moment-timezone/issues/11
     // https://github.com/moment/moment-timezone/pull/25
@@ -127,7 +144,7 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
 	}
 
 	if (newMoment.format('YYYY-MM-DD HH:mm:ss') !== timeString) {
-    	throw new Error('Fuck nuggets:' + newMoment.format('YYYY-MM-DD HH:mm:ss') + ' did not match ' + timeString);
+    	throw new Error('Despite our best efforts, moment.js resulted in a date mismatch:' + newMoment.format('YYYY-MM-DD HH:mm:ss') + ' did not match ' + timeString);
     }
 
     return newMoment;
