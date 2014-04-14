@@ -1,0 +1,33 @@
+.ftz-invalid {
+    background-color: #FFE6E6;
+}
+
+div.ui-datepicker{
+    font-size: 11px;
+}
+
+  .ui-autocomplete {
+    max-height: 180px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+  }
+
+  .ftz-loading {
+    color: lightgray;
+  }
+
+  .ftz-table .ftz-grabspan {
+    width: 16px;
+    height: 16px;
+    display: block;
+    background-image: url('grab.png');
+    background-repeat: no-repeat;
+
+  }
+
+  .ftz-table .ftz-ungrabbablespan {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }

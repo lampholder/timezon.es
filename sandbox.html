@@ -4,7 +4,7 @@
 		<title>Sandbox</title>
 		<link rel="stylesheet" type="text/css" href="css/select2/select2.css">
         <link rel="stylesheet" type="text/css" href="css/ui-lightness/jquery-ui-1.10.4.custom.css">
-        <link rel="stylesheet" type="text/css" href="css/timezones.css">
+        <link rel="stylesheet" type="text/css" href="css/ftz.css">
 	</head>
 	<body>
 		<script type="text/javascript" src="lib/cities.js"></script>
@@ -18,7 +18,19 @@
         <script type="text/javascript" src="lib/moment-timezone-data.js"></script>
 
         <script type="text/javascript" src="src/dst.js"></script>
-        <script type="text/javascript" src="src/timezones.js"></script>
+        <script type="text/javascript" src="src/ftz.js"></script>
 		<table id='test'><tr><td>This is a test.</td></tr></table>
+        <script type="text/javascript">
+            $(window).load(function () {
+                $(function() {
+                    //$('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
+                    var cities = JSON.parse($.cookie('cities') || "[]");
+                    $('#test').timezoneTable({'cities': cities});
+                    $('#test').on('citieschanged', function (e, city, cities) {
+                        $.cookie('cities', JSON.stringify(cities));
+                    });
+                });
+            });
+        </script>
 	</body>
 </html>

@@ -1,17 +1,5 @@
 var DST = {};
 
-/*
-DST._cache = {};
-DST._cache.values = {};
-DST._cache.read = function(startDate, endDate) {
-	var tz = startDate.tz() || 'BROWSER_LOCAL';
-	if (DST._cache.values[tz] === undefined) {
-		return undefined;
-	}
-
-};
-*/
-
 DST.getNextDSTEvent = function(startDate, endDate) {
 	"use strict";
 
