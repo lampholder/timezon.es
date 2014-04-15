@@ -6,7 +6,7 @@ $.widget("ftz.timezoneTable", {
         cities: [],
         dateFormat: 'YYYY-MM-DD',
         timeFormat: 'HH:mm',
-        _moment: moment.utc(),
+        _unixTime: 0,
     },
     _isFtz: function() {
         return true;
@@ -18,7 +18,8 @@ $.widget("ftz.timezoneTable", {
         this.element.empty();
 
         var self = this;
-        self.moment().seconds(0).milliseconds(0);
+        self.moment(moment()); // Initialise the internal unixtime representation of now to now
+        //self.moment().seconds(0).milliseconds(0);
 
         this.element.addClass('ftz-table')
              .append('<thead><tr><th></th><th>Location</th><th>Date</th><th>Time</th><th>Offset</th><th>Local DST</th></tr></thead>')
@@ -78,10 +79,10 @@ $.widget("ftz.timezoneTable", {
     },
     moment: function(value) {
         if (undefined === value) {
-            return moment(this.options._moment);
+            return moment.unix(this.options._unixTime);
         }
         else {
-            this.options._moment = moment(value);
+            this.options._unixTime = value.format('X');
             this.element.trigger('timechanged');
         }
     }
