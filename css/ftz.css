@@ -1,3 +1,75 @@
+/* This css should be good */
+
+table.ftz-table {
+    font-family: "Arial", sans-serif;
+    border-collapse: collapse;
+    font-size: medium;
+    margin-top: 30px;
+    margin-left: 10px;
+}
+
+table.ftz-table td {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+table.ftz-table th {
+    padding-left: 10px;
+    padding-right: 10px;
+    font-weight: normal;
+    text-align: left;
+}
+
+tr.ftz-row {
+    height: 40px;
+}
+
+tr.ftz-row em {
+    font-weight: bolder;
+    font-style: normal;    
+}
+
+input[type="text"].ftz-date_input, input[type="text"].ftz-time_input {
+    font-size: medium;
+    font-family: monospace;
+    padding-left: 4px;
+    padding-right: 4px;
+    border: 1px solid #999;
+}
+
+tr.ftz-local {
+    border-left: 6px solid #999;
+    background-color: #efefef;
+}
+
+tr.ftz-nonlocal {
+    border-left: 6px solid #61b9e7;
+    background-color: #e6f0ff;  
+}
+
+span.ftz-tz_offset {
+    font-family: monospace;
+    padding-right: 20px;
+}
+
+td.ftz-dst {
+    background: #FEEFB3;
+    box-shadow: inset 6px 0px 12px -6px #f2c779;
+    width: 180px;
+    text-align: center;
+}
+
+table.ftz-table tfoot tr {
+    background-color: orange;
+    padding-top: 20px;
+    height: 40px;
+    border-left: 6px solid #e6e6e6;
+    background-color: #FCFCFC;
+}
+
+
+/* I haven't thought about any of the stuff below. */
+
 .ftz-invalid {
     background-color: #FFE6E6;
 }

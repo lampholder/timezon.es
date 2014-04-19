@@ -1,0 +1,16 @@
+body {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+h1 {
+    padding-top: 6px;
+    color: #BFDFFF;
+    text-shadow: -1px 0 #7AA3CC, 0 1px #7AA3CC, 1px 0 #7AA3CC, 0 -1px #7AA3CC;
+    margin-left: 10px;
+    font-size: 50px;
+    text-decoration: none;
+}
+
+p {
+    margin-left: 10px;
+}
