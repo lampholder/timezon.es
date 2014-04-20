@@ -23,7 +23,7 @@ $.widget("ftz.timezoneTable", {
 
         this.element.addClass('ftz-table')
              //.append('<thead><tr><th>Location</th><th>Date</th><th>Time</th><th>Offset</th><th>Local DST</th></tr></thead>')
-             .append('<tfoot><tr><td id=\'ftz-add_city\'></td><td></td><td></td><td></td></tr></tfoot>');
+             .append('<tfoot><tr><td class="ftz-rowControl"></td><td id=\'ftz-add_city\' class=\'ftz-rowName\'></td><td></td><td></td><td></td></tr></tfoot>');
         var addCityCell = this.element.find('#ftz-add_city');
         var tableHead = this.element.first('thead');
 
@@ -102,7 +102,7 @@ $.widget("ftz._timezoneRow", {
 
         this._cityName = $('<span />', {'class': 'ftz-city_name'});
         // TODO: generate this placeholder + size as appropriate to the date format
-        this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}).attr('size', 10); 
+        this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}).attr('size', 9); 
         this._timeInput = $('<input />', {'type': 'text', 'class': 'ftz-time_input', 'placeholder': '09:00'}).attr('size', 5);
         var _timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'})._offset();
         _timeZoneOffset.on('change', function() {self._pushChanges();});
@@ -143,11 +143,12 @@ $.widget("ftz._timezoneRow", {
 
         this.element.addClass('ftz-row');
         this.element.addClass(this._getClass());
-        this.element.append($('<th />').append(this._cityName))
-                    .append($('<td />').append(this._dateInput))
-                    .append($('<td />').append(this._timeInput))
-                    .append($('<td />').append(_timeZoneOffset))
-                    .append($('<td />').append(this._dstIndicator).attr('class', 'ftz-dst'));
+        this.element.append($('<td />', {'class': 'ftz-rowControl'}))
+                    .append($('<td />', {'class': 'ftz-rowInfo ftz-rowName'}).append(this._cityName))
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._dateInput))
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._timeInput))
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(_timeZoneOffset))
+                    .append($('<td />', {'class': 'ftz-dst'}).append(this._dstIndicator));
 
         this._ftz().element.on('timechanged', function() {
             self.refresh();

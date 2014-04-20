@@ -8,16 +8,16 @@ table.ftz-table {
     margin-left: 10px;
 }
 
-table.ftz-table td {
+td.ftz-rowInfo {
     padding-left: 4px;
     padding-right: 4px;
 }
 
-table.ftz-table th {
+td.ftz-rowName {
     padding-left: 10px;
     padding-right: 10px;
-    font-weight: normal;
     text-align: left;
+    font-weight: normal;
 }
 
 tr.ftz-row {
@@ -29,6 +29,14 @@ tr.ftz-row em {
     font-style: normal;    
 }
 
+input[type="text"].ftz-date_input {
+    width: 10ch;
+}
+
+input[type="text"].ftz-time_input {
+    width: 5ch;
+}
+
 input[type="text"].ftz-date_input, input[type="text"].ftz-time_input {
     font-size: medium;
     font-family: monospace;
@@ -38,13 +46,25 @@ input[type="text"].ftz-date_input, input[type="text"].ftz-time_input {
 }
 
 tr.ftz-local {
-    border-left: 6px solid #999;
     background-color: #efefef;
 }
 
+tr.ftz-local td.ftz-rowControl {
+    width: 6px;
+    background-color: #999;
+}
+
 tr.ftz-nonlocal {
-    border-left: 6px solid #61b9e7;
     background-color: #e6f0ff;  
+}
+
+tr.ftz-nonlocal td.ftz-rowControl {
+    width: 6px;
+    background-color: #61b9e7;
+}
+
+td.ftz-rowControl {
+    padding: 0px;
 }
 
 span.ftz-tz_offset {
@@ -60,13 +80,14 @@ td.ftz-dst {
 }
 
 table.ftz-table tfoot tr {
-    background-color: orange;
     padding-top: 20px;
     height: 40px;
-    border-left: 6px solid #e6e6e6;
     background-color: #FCFCFC;
 }
 
+table.ftz-table tfoot td.ftz-rowControl {
+    background-color: #e6e6e6;
+}
 
 /* I haven't thought about any of the stuff below. */
 

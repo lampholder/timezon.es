@@ -40,19 +40,31 @@ TIMEZONES = {};
         var timeRegex = RegExp('^\d{1,2}:?\d{2}$');
 
         if (dateTimeRegex.test(timeInPrimaryCity)) {
-            //TODO: dig a usable time out of the URL
+            var time = DST.createTimeInTimezone(timeInPrimaryCity, primaryCity.tz).local();
+            return {'cities': [primaryCity, secondaryCity], 'time': time};
         }
         else if (timeRegex.test(timeInPrimaryCity)) {
-
+            throw "I can only deal with full datetimes right now"
         }
         else throw "Date/time incorrectly formatted";
+
+
     };
 
     $(window).load(function () {
         $(function() {
+            var fromURL = TIMEZONES.getSetupFromUrl();
+            if(fromURL) {
+                $('#test').timezoneTable({'cities': fromURL.cities});
+            }
+            else {
+                var cities = JSON.parse($.cookie('cities') || "[]");
+                $('#test').timezoneTable({'cities': cities});
+            }
+
+
             //$('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
-            var cities = JSON.parse($.cookie('cities') || "[]");
-            $('#test').timezoneTable({'cities': cities});
+
             //$('#test').timezoneTable('moment', moment('2001-01-01 20:15').tz('America/Los_Angeles'));
             $('#test').on('citieschanged', function (e, city, cities) {
                 $.cookie('cities', JSON.stringify(cities));
