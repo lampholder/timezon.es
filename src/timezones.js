@@ -12,7 +12,7 @@ TIMEZONES = {};
     };
 
     TIMEZONES.getSetupFromUrl = function() {
-        var entities = window.location.pathname.split('/');
+        var entities = decodeURI(window.location.pathname).split('/');
         entities.splice(0,1); // Remove the first, empty element
         if (entities.length < 3) {
             return false;
@@ -43,7 +43,7 @@ TIMEZONES = {};
             var time = DST.createTimeInTimezone(timeInPrimaryCityString, primaryCity.tz).local();
             return {'cities': [primaryCity, secondaryCity], 'time': time};
         }
-        else if (timeRegex.test(timeInPrimaryCity)) {
+        else if (timeRegex.test(timeInPrimaryCityString)) {
             throw "I can only deal with full datetimes right now"
         }
         else throw "Date/time incorrectly formatted";
