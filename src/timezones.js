@@ -13,12 +13,12 @@ TIMEZONES = {};
 
     TIMEZONES.getSetupFromUrl = function() {
         var entities = decodeURI(window.location.pathname).split('/');
-        entities.splice(0,1); // Remove the first, empty element
+        entities.shift()); // Remove the first, empty element
         if (entities.length < 3) {
             return false;
         }
-        var primaryCityString = entities.splice(0, 1);
-        var timeInPrimaryCityString = entities.splice(0, 1);
+        var primaryCityString = entities.shift());
+        var timeInPrimaryCityString = entities.shift();
         var secondaryCitiesStrings = entities;
 
 
