@@ -39,8 +39,8 @@ TIMEZONES = {};
         var dateTimeRegex = RegExp('^\d{4}-\d{2}-\d{2} \d{2}:?\d{2}$');
         var timeRegex = RegExp('^\d{1,2}:?\d{2}$');
 
-        if (dateTimeRegex.test(timeInPrimaryCity)) {
-            var time = DST.createTimeInTimezone(timeInPrimaryCity, primaryCity.tz).local();
+        if (dateTimeRegex.test(timeInPrimaryCityString)) {
+            var time = DST.createTimeInTimezone(timeInPrimaryCityString, primaryCity.tz).local();
             return {'cities': [primaryCity, secondaryCity], 'time': time};
         }
         else if (timeRegex.test(timeInPrimaryCity)) {
