@@ -13,11 +13,11 @@ TIMEZONES = {};
 
     TIMEZONES.getSetupFromUrl = function() {
         var entities = decodeURI(window.location.pathname).split('/');
-        entities.shift()); // Remove the first, empty element
+        entities.shift(); // Remove the first, empty element
         if (entities.length < 3) {
             return false;
         }
-        var primaryCityString = entities.shift());
+        var primaryCityString = entities.shift();
         var timeInPrimaryCityString = entities.shift();
         var secondaryCitiesStrings = entities;
 
@@ -36,11 +36,11 @@ TIMEZONES = {};
         }
         var secondaryCity = secondaryCityMatch[0];
 
-        var dateTimeRegex = RegExp('^\d{4}-\d{2}-\d{2} \d{2}:?\d{2}$');
-        var timeRegex = RegExp('^\d{1,2}:?\d{2}$');
+        var dateTimeRegex = RegExp(/^\d{4}-\d{2}-\d{2}T\d{2}:?\d{2}$/);
+        var timeRegex = RegExp(/^\d{1,2}:?\d{2}$/);
 
         if (dateTimeRegex.test(timeInPrimaryCityString)) {
-            var time = DST.createTimeInTimezone(timeInPrimaryCityString, primaryCity.tz).local();
+            var time = DST.createTimeInTimezone(timeInPrimaryCityString + ':00', primaryCity.tz).local();
             return {'cities': [primaryCity, secondaryCity], 'time': time};
         }
         else if (timeRegex.test(timeInPrimaryCityString)) {
@@ -56,6 +56,7 @@ TIMEZONES = {};
             var fromURL = TIMEZONES.getSetupFromUrl();
             if(fromURL) {
                 $('#test').timezoneTable({'cities': fromURL.cities});
+                $('#test').timezoneTable('moment', fromURL.time);
             }
             else {
                 var cities = JSON.parse($.cookie('cities') || "[]");
