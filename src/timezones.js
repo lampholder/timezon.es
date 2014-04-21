@@ -40,11 +40,12 @@ TIMEZONES = {};
         var timeRegex = RegExp(/^\d{1,2}:?\d{2}$/);
 
         if (dateTimeRegex.test(timeInPrimaryCityString)) {
-            var time = DST.createTimeInTimezone(timeInPrimaryCityString + ':00', primaryCity.tz).local();
+            var time = DST.createTimeInTimezone(timeInPrimaryCityString.replace('T', ' ') + ':00', primaryCity.tz).local();
             return {'cities': [primaryCity, secondaryCity], 'time': time};
         }
         else if (timeRegex.test(timeInPrimaryCityString)) {
-            throw "I can only deal with full datetimes right now"
+            time = DST.createTimeInTimezone(moment().format('YYYY-MM-DD') + ' ' + timeInPrimaryCityString + ':00', primaryCity.tz).local();
+            return {'cities': [primaryCity, secondaryCity], 'time': time};
         }
         else throw "Date/time incorrectly formatted";
 
