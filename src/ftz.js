@@ -7,6 +7,29 @@ $.widget("ftz.timezoneTable", {
         dateFormat: 'YYYY-MM-DD',
         timeFormat: 'HH:mm',
         _unixTime: 0,
+        _reshapable: false
+    },
+    reshapable: function(reshapable) {
+        if (undefined === reshapable) {
+            return this._reshapable;
+        }
+        else {
+            if (this.reshapable() === reshapable) {
+                return;
+            }
+            var rowControls = this.element.find('.ftz-rowControlHolder');
+            if (reshapable) {
+                rowControls.animate({'width': '60px'}, function() {
+                    rowControls.children().show();
+                });
+                return;
+            }
+            else {
+                rowControls.children().hide();
+                this.element.find('.ftz-rowControlHolder').animate({'width': '6px'});
+                return;
+            }
+        }
     },
     _isFtz: function() {
         return true;
@@ -23,7 +46,7 @@ $.widget("ftz.timezoneTable", {
 
         this.element.addClass('ftz-table')
              //.append('<thead><tr><th>Location</th><th>Date</th><th>Time</th><th>Offset</th><th>Local DST</th></tr></thead>')
-             .append('<tfoot><tr><td class="ftz-rowControl"></td><td id=\'ftz-add_city\' class=\'ftz-rowName\'></td><td></td><td></td><td></td></tr></tfoot>');
+             .append('<tfoot><tr><td class="ftz-rowControlHolder"></td><td id=\'ftz-add_city\' class=\'ftz-rowName\'></td><td></td><td></td><td></td></tr></tfoot>');
         var addCityCell = this.element.find('#ftz-add_city');
         var tableHead = this.element.first('thead');
 
@@ -64,11 +87,14 @@ $.widget("ftz.timezoneTable", {
         $.each(this.options.cities, function(index, value) {
             self._addRow(value);
         });
+        delete this.options.cities; // Don't access this again.
+    },
+    cities: function() {
+        return this.element.find('.ftz-nonlocal').map(function(index, element) {return $(element)._timezoneRow('city');}).toArray();
     },
     addRow: function(city) {
-        this.options.cities.push(city);
         var newRow = this._addRow(city);
-        this.element.trigger('citieschanged', [city, this.options.cities]); // This isn't working
+        this.element.trigger('citieschanged', [city, this.cities()]);
         return newRow;
     },
     _addRow: function(city) {
@@ -143,7 +169,7 @@ $.widget("ftz._timezoneRow", {
 
         this.element.addClass('ftz-row');
         this.element.addClass(this._getClass());
-        this.element.append($('<td />', {'class': 'ftz-rowControl'}))
+        this.element.append($('<td />', {'class': 'ftz-rowControlHolder'}).append(this._getControls()))
                     .append($('<td />', {'class': 'ftz-rowInfo ftz-rowName'}).append(this._cityName))
                     .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._dateInput))
                     .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._timeInput))
@@ -159,6 +185,19 @@ $.widget("ftz._timezoneRow", {
     },
     _getClass: function() {
         return 'ftz-nonlocal';
+    },
+    _getControls: function() {
+        var self = this;
+        // Controls
+        var _delete = $('<span />', {'class': 'ftz-rowControl', 'text': 'X'}).on('click', function() {
+            var deletedCity = self.city();
+            var ftz = self._ftz();
+            self.element.remove();
+            // TODO: Make this event spec. less weird
+            ftz.element.trigger('citieschanged', [deletedCity, ftz.cities()]); // This is a weirdly-specified event
+        });
+
+        return _delete;
     },
     city: function(value) {
         if (undefined === value) {
@@ -255,6 +294,9 @@ $.widget("ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
     */
     _getClass: function() {
         return 'ftz-local';
+    },
+    _getControls: function() {
+        return null;
     },
     _getCityName: function() {
         return '<em>Browser local time</em> (UTC ' + moment().format('ZZ') + ')';

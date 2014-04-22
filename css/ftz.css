@@ -49,7 +49,7 @@ tr.ftz-local {
     background-color: #efefef;
 }
 
-tr.ftz-local td.ftz-rowControl {
+tr.ftz-local td.ftz-rowControlHolder {
     width: 6px;
     background-color: #999;
 }
@@ -58,13 +58,14 @@ tr.ftz-nonlocal {
     background-color: #e6f0ff;  
 }
 
-tr.ftz-nonlocal td.ftz-rowControl {
+tr.ftz-nonlocal td.ftz-rowControlHolder {
     width: 6px;
     background-color: #61b9e7;
 }
 
-td.ftz-rowControl {
+td.ftz-rowControlHolder {
     padding: 0px;
+    overflow: hidden;
 }
 
 span.ftz-tz_offset {
@@ -79,13 +80,20 @@ td.ftz-dst {
     text-align: center;
 }
 
+.ftz-rowControl {
+    display: none;
+    width: 22px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
 table.ftz-table tfoot tr {
     padding-top: 20px;
     height: 40px;
     background-color: #FCFCFC;
 }
 
-table.ftz-table tfoot td.ftz-rowControl {
+table.ftz-table tfoot td.ftz-rowControlHolder {
     background-color: #e6e6e6;
 }
 
