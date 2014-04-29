@@ -159,3 +159,9 @@ cities.sort(key=lambda x: x['name'].upper())
 
 print city_js
 print 'CITY.cities = %s' % json.dumps(cities, indent=1, separators=(',', ': '))
+
+source = {'url': 'http://download.geonames.org/export/dump/',
+          'file': filename + '.zip',
+          'min': args.min}
+
+print 'CITY.source = %s' % json.dumps(source)
