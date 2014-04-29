@@ -24,6 +24,46 @@ The main 'geoname' table has the following fields :
 18 modification date : date of last modification in yyyy-MM-dd format
 """
 
+city_js = """var CITY = {};
+'use strict';
+
+CITY.findCitiesByName = function(cityName) {
+
+    var minIndex = 0;
+    var maxIndex = this.cities.length - 1;
+    var currentIndex;
+    var currentElement;
+
+    while (minIndex <= maxIndex) {
+        currentIndex = (minIndex + maxIndex) / 2 | 0;
+        currentElement = this.cities[currentIndex];
+
+        if (currentElement.name < cityName) {
+            minIndex = currentIndex + 1;
+        }
+        else if (currentElement.name > cityName) {
+            maxIndex = currentIndex - 1;
+        }
+        else {
+            break;
+        }
+    }
+
+    while (currentIndex >= 1 && this.cities[currentIndex - 1].name == cityName) {
+        currentIndex--;
+    }
+    
+    matchingCities = [];
+    while (this.cities[currentIndex].name == cityName) {
+        matchingCities.push(this.cities[currentIndex]);
+        currentIndex++;
+    }
+
+    return matchingCities;
+
+};
+"""
+
 import argparse
 import collections
 import csv, json
@@ -51,13 +91,12 @@ zipdata.write(response.read())
 
 cities_file = ZipFile(zipdata).open(filename + '.txt')
 
-
 with cities_file as csvfile:
     reader = csv.reader(csvfile, delimiter='\t', quoting=csv.QUOTE_NONE)
     cities = []
     for row in reader:
         structured = collections.OrderedDict()  # cosmetic only
-        structured['id'] = int(row[0])
+        structured['id'] = row[0]
         structured['name'] = row[2]
         structured['tz'] = row[17]
         structured['country'] = row[8]
@@ -65,4 +104,56 @@ with cities_file as csvfile:
         if args.min is None or int(row[14]) >= args.min:
             cities.append(structured)
 
+generics = [('CET - Central European Time', 'CET'),
+            ('CST6CDT', 'CST6CDT'),
+            ('EET - Eastern European Time', 'EET'),
+            ('EST - Eastern Standard Time', 'EST'),
+            ('EST5EDT', 'EST5EDT'),
+            ('HST - Hawaii Standard Time', 'HST'),
+            ('MET - Middle European Time', 'MET'),
+            ('MST - Mountain Standard Time', 'MST'),
+            ('MST7MDT', 'MST7MDT'),
+            ('PST8PDT', 'PST8PDT'),
+            ('WET - Western European Time', 'WET'),
+            ('GMT - Greenwich Mean Time', 'Etc/GMT'),
+            ('GMT+1', 'Etc/GMT+1'),
+            ('GMT+10', 'Etc/GMT+10'),
+            ('GMT+11', 'Etc/GMT+11'),
+            ('GMT+12', 'Etc/GMT+12'),
+            ('GMT+2', 'Etc/GMT+2'),
+            ('GMT+3', 'Etc/GMT+3'),
+            ('GMT+4', 'Etc/GMT+4'),
+            ('GMT+5', 'Etc/GMT+5'),
+            ('GMT+6', 'Etc/GMT+6'),
+            ('GMT+7', 'Etc/GMT+7'),
+            ('GMT+8', 'Etc/GMT+8'),
+            ('GMT+9', 'Etc/GMT+9'),
+            ('GMT-1', 'Etc/GMT-1'),
+            ('GMT-10', 'Etc/GMT-10'),
+            ('GMT-11', 'Etc/GMT-11'),
+            ('GMT-12', 'Etc/GMT-12'),
+            ('GMT-13', 'Etc/GMT-13'),
+            ('GMT-14', 'Etc/GMT-14'),
+            ('GMT-2', 'Etc/GMT-2'),
+            ('GMT-3', 'Etc/GMT-3'),
+            ('GMT-4', 'Etc/GMT-4'),
+            ('GMT-5', 'Etc/GMT-5'),
+            ('GMT-6', 'Etc/GMT-6'),
+            ('GMT-7', 'Etc/GMT-7'),
+            ('GMT-8', 'Etc/GMT-8'),
+            ('GMT-9', 'Etc/GMT-9'),
+            ('UCT', 'Etc/UCT'),
+            ('UTC', 'Etc/UTC')]
+
+for i in range(0, len(generics)):
+    structured = collections.OrderedDict()  # cosmetic only
+    (name, tz) = generics[i]
+    structured['id'] = 'G%d' % i
+    structured['name'] = name
+    structured['tz'] = tz
+    structured['country'] = None
+    structured['population'] = None
+    cities.append(structured)
+
+print city_js
 print json.dumps(cities, indent=1, separators=(',', ': '))
