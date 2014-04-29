@@ -155,5 +155,7 @@ for i in range(0, len(generics)):
     structured['population'] = None
     cities.append(structured)
 
+cities.sort(key=lambda x: x['name'].upper())
+
 print city_js
-print json.dumps(cities, indent=1, separators=(',', ': '))
+print 'CITY.cities = %s' % json.dumps(cities, indent=1, separators=(',', ': '))
