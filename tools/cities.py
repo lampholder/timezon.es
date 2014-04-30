@@ -155,6 +155,9 @@ for i in range(0, len(generics)):
     structured['population'] = None
     cities.append(structured)
 
+edgecaseville = [('Lord Howe Island', 'Australia/Lord_Howe'),
+                 ('Eucla', 'Australia/Eucla')]
+
 cities.sort(key=lambda x: x['name'].upper())
 
 print city_js

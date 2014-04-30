@@ -70,14 +70,17 @@ td.ftz-rowControlHolder {
 
 span.ftz-tz_offset {
     font-family: monospace;
-    padding-right: 20px;
 }
 
 td.ftz-dst {
     background: #FEEFB3;
     box-shadow: inset 6px 0px 12px -6px #f2c779;
-    width: 180px;
+    width: 240px;
     text-align: center;
+}
+
+td.ftz-nodst {
+    display: none;
 }
 
 .ftz-rowControl {
@@ -95,6 +98,12 @@ table.ftz-table tfoot tr {
 
 table.ftz-table tfoot td.ftz-rowControlHolder {
     background-color: #e6e6e6;
+}
+
+span.ftz-zoneAbbr {
+    font-family: monospace;
+    color: darkgrey;
+    padding-right: 20px;
 }
 
 /* I haven't thought about any of the stuff below. */

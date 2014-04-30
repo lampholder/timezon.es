@@ -7,14 +7,14 @@ $.widget("ftz.timezoneTable", {
         dateFormat: 'YYYY-MM-DD',
         timeFormat: 'HH:mm',
         _unixTime: 0,
-        _reshapable: false
+        _mutable: false
     },
-    reshapable: function(reshapable) {
-        if (undefined === reshapable) {
-            return this._reshapable;
+    mutable: function(mutable) {
+        if (undefined === mutable) {
+            return this._mutable;
         }
         else {
-            if (this.reshapable() === reshapable) {
+            if (this.mutable() === mutable) {
                 return;
             }
             var rowControls = this.element.find('.ftz-rowControlHolder');
@@ -42,17 +42,15 @@ $.widget("ftz.timezoneTable", {
 
         var self = this;
         self.moment(moment()); // Initialise the internal unixtime representation of now to now
-        //self.moment().seconds(0).milliseconds(0);
 
         this.element.addClass('ftz-table')
-             //.append('<thead><tr><th>Location</th><th>Date</th><th>Time</th><th>Offset</th><th>Local DST</th></tr></thead>')
              .append('<tfoot><tr><td class="ftz-rowControlHolder"></td><td id=\'ftz-add_city\' class=\'ftz-rowName\'></td><td></td><td></td><td></td></tr></tfoot>');
         var addCityCell = this.element.find('#ftz-add_city');
         var tableHead = this.element.first('thead');
 
         var browserLocalTimeRow = $('<tr />');
         tableHead.append(browserLocalTimeRow);
-        browserLocalTimeRow._localBrowserTimezoneRow(); //{'city': {'id': -1, 'name': 'Browser local time ', 'tz': 'UTC ' + moment().format('ZZ')}});
+        browserLocalTimeRow._localBrowserTimezoneRow(); 
 
         var selector = $('<span/>', {'id': 'ftz-selector', 'width': '100%'});
         addCityCell.append(selector);
@@ -127,6 +125,8 @@ $.widget("ftz._timezoneRow", {
         var self = this;
 
         this._cityName = $('<span />', {'class': 'ftz-city_name'});
+        this._zoneAbbr = $('<span />', {'class': 'ftz-zoneAbbr'});
+
         // TODO: generate this placeholder + size as appropriate to the date format
         this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}).attr('size', 9); 
         this._timeInput = $('<input />', {'type': 'text', 'class': 'ftz-time_input', 'placeholder': '09:00'}).attr('size', 5);
@@ -135,7 +135,7 @@ $.widget("ftz._timezoneRow", {
 
         this._timeZoneOffset = _timeZoneOffset.data('ftz-_offset');
 
-        this._dstIndicator = $('<span />');
+        this._dstIndicator = $('<td />');
 
         // For fuck's sake - datepicker and timezone-js's date format strings don't match up.
         this._dateInput.datepicker({ dateFormat: 'yy-mm-dd' }); //this._ftz().options.dateFormat
@@ -157,6 +157,7 @@ $.widget("ftz._timezoneRow", {
 
                                            // afaik this is the only way to trigger the change event programatically and not have it
                                            // trigger again when the original element actually loses focus :S
+                                           // Also, this doesn't seem to work correctly on mobile chrome
                                            self._timeInput.blur();
                                            self._timeInput.focus();
                                        },
@@ -174,7 +175,8 @@ $.widget("ftz._timezoneRow", {
                     .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._dateInput))
                     .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._timeInput))
                     .append($('<td />', {'class': 'ftz-rowInfo'}).append(_timeZoneOffset))
-                    .append($('<td />', {'class': 'ftz-dst'}).append(this._dstIndicator));
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._zoneAbbr))
+                    .append(this._dstIndicator);
 
         this._ftz().element.on('timechanged', function() {
             self.refresh();
@@ -221,6 +223,8 @@ $.widget("ftz._timezoneRow", {
     refresh: function() {
         this._cityName.html(this._getCityName());
         var localDatetime = this.getLocalDatetime();
+
+        this._zoneAbbr.text(localDatetime.format('z'));
 
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
         this._timeInput.val(localDatetime.format(this._ftz().options.timeFormat));
@@ -318,18 +322,20 @@ $.widget('ftz._dstIndicator', {
     _init: function() {
         this.element.empty();
         var translator = {
-            'BACK': '&#9668;',
-            'FORWARD': '&#9658;',
+            'BACK': 'Clocks go back in ', //'&#9668;',
+            'FORWARD': 'Clocks go forward in ', //'&#9658;',
             'NO_DST': ''
         }
         this._direction = $('<span />', {class: 'ftz-dstIndicatorDirection', html: translator[this.options.eventType]});
         
         this._daysFromNow = $('<span />', {class: 'ftz-dstIndicatorDaysFromNow'});
         if (this.options.eventType != 'NO_DST') {
-            this._daysFromNow.text(this._getDaysFromNow() + ' days away');
+            this._daysFromNow.text(this._getDaysFromNow() + ' days');
+            this.element.addClass('ftz-dst');
         }
         else {
-            this._daysFromNow.text('No DST');
+            this.element.addClass('ftz-nodst');
+            // this._daysFromNow.text('No DST');
         }
         this.element.append(this._direction);
         this.element.append(this._daysFromNow);
