@@ -18,7 +18,7 @@ $.widget("ftz.timezoneTable", {
                 return;
             }
             var rowControls = this.element.find('.ftz-rowControlHolder');
-            if (reshapable) {
+            if (mutable) {
                 rowControls.animate({'width': '60px'}, function() {
                     rowControls.children().show();
                 });
@@ -51,6 +51,12 @@ $.widget("ftz.timezoneTable", {
         var browserLocalTimeRow = $('<tr />');
         tableHead.append(browserLocalTimeRow);
         browserLocalTimeRow._localBrowserTimezoneRow(); 
+
+        /*
+        var unixtimeRow = $('<tr />');
+        tableHead.append(unixtimeRow);
+        unixtimeRow._unixtimeRow();
+        */ 
 
         var selector = $('<span/>', {'id': 'ftz-selector', 'width': '100%'});
         addCityCell.append(selector);
@@ -130,10 +136,10 @@ $.widget("ftz._timezoneRow", {
         // TODO: generate this placeholder + size as appropriate to the date format
         this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}).attr('size', 9); 
         this._timeInput = $('<input />', {'type': 'text', 'class': 'ftz-time_input', 'placeholder': '09:00'}).attr('size', 5);
-        var _timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'})._offset();
-        _timeZoneOffset.on('change', function() {self._pushChanges();});
+        this._timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'})._offset();
+        this._timeZoneOffset.on('change', function() {self._pushChanges();});
 
-        this._timeZoneOffset = _timeZoneOffset.data('ftz-_offset');
+        //this._timeZoneOffset = _timeZoneOffset.data('ftz-_offset');
 
         this._dstIndicator = $('<td />');
 
@@ -168,15 +174,7 @@ $.widget("ftz._timezoneRow", {
             self._timeInput.autocomplete('search', '');
         });
 
-        this.element.addClass('ftz-row');
-        this.element.addClass(this._getClass());
-        this.element.append($('<td />', {'class': 'ftz-rowControlHolder'}).append(this._getControls()))
-                    .append($('<td />', {'class': 'ftz-rowInfo ftz-rowName'}).append(this._cityName))
-                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._dateInput))
-                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._timeInput))
-                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(_timeZoneOffset))
-                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._zoneAbbr))
-                    .append(this._dstIndicator);
+        this._render();
 
         this._ftz().element.on('timechanged', function() {
             self.refresh();
@@ -184,6 +182,17 @@ $.widget("ftz._timezoneRow", {
 
         this.refresh();
         return this;
+    },
+    _render: function() {
+        this.element.addClass('ftz-row');
+        this.element.addClass(this._getClass());
+        this.element.append($('<td />', {'class': 'ftz-rowControlHolder'}).append(this._getControls()))
+                    .append($('<td />', {'class': 'ftz-rowInfo ftz-rowName'}).append(this._cityName))
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._dateInput))
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._timeInput))
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._timeZoneOffset))
+                    .append($('<td />', {'class': 'ftz-rowInfo'}).append(this._zoneAbbr))
+                    .append(this._dstIndicator);
     },
     _getClass: function() {
         return 'ftz-nonlocal';
@@ -228,7 +237,8 @@ $.widget("ftz._timezoneRow", {
 
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
         this._timeInput.val(localDatetime.format(this._ftz().options.timeFormat));
-        this._timeZoneOffset.offsets(this._getValidOffsets()).choose(localDatetime.format('Z'));
+        this._timeZoneOffset._offset('offsets', this._getValidOffsets());
+        this._timeZoneOffset._offset('choose', localDatetime.format('Z'));
 
         var self = this;
         //self._dstComment.addClass('ftz-loading');
@@ -282,6 +292,12 @@ $.widget("ftz._timezoneRow", {
         this._ftz().moment(DST.createTimeInTimezone(date_string, tz, date_format));
 
     }
+});
+
+$.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
+    _getCityName: function() {
+        return '<em>Unixtime</em>';
+    },
 });
 
 $.widget("ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
