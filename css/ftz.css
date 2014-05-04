@@ -37,9 +37,14 @@ input[type="text"].ftz-time_input {
     width: 5ch;
 }
 
+td.ftz-unixtime {
+    text-align: right;
+}
+
 input[type="text"].ftz-unixtime_input {
     width: 10ch;
     text-align: right;
+    margin-right: 3px;
 }
 
 input[type="text"].ftz-date_input, input[type="text"].ftz-time_input, input[type="text"].ftz-unixtime_input {
@@ -115,7 +120,7 @@ span.ftz-unixsplanation {
     font-family: monospace;
     color: darkgrey;
     padding-right: 20px;
-    padding-left: 8px;
+    padding-left: 2px;
 }
 
 /* I haven't thought about any of the stuff below. */
@@ -133,10 +138,6 @@ div.ui-datepicker{
     overflow-y: auto;
     /* prevent horizontal scrollbar */
     overflow-x: hidden;
-  }
-
-  .ftz-loading {
-    color: lightgray;
   }
 
   .ftz-table .ftz-grabspan {

@@ -1,6 +1,11 @@
 (function(){
 'use strict'
 
+$.fn.tzr = function() {
+    // A plague on jQuery for not making this more straightforward.
+    return this.data('ftz-_timezoneRowInterface');
+}
+
 $.widget("ftz.timezoneTable", {
     options: {
         cities: [],
@@ -93,12 +98,7 @@ $.widget("ftz.timezoneTable", {
     },
     cities: function() {
         return this.element.find('.ftz-nonlocal').map(function(index, element) {
-            if ($(element).data('ftz-_timezoneRow') !== undefined) {
-                return $(element)._timezoneRow('city');
-            }
-            else if ($(element).data('ftz-_unixtimeRow') !== undefined) {
-                return $(element)._unixtimeRow('city');
-            }
+            return $(element).tzr().city();
         }).toArray();
     },
     addRow: function(city, suppressEvent) {
@@ -133,25 +133,24 @@ $.widget("ftz._timezoneRow", {
         city: undefined
     },
     _init: function() {
+        var self = this;
+
         if (this.element.prop('tagName').toLowerCase() !== 'tr' ) {
             throw Error('Tried to turn a non-\'tr\' element into a timezoneRow.');
         }
         this.element.empty();
 
-        var self = this;
+        this.element.data('ftz-_timezoneRowInterface', this);
 
         this._cityName = $('<span />', {'class': 'ftz-city_name'});
         this._cityName.html(this._getCityName());
 
         this._zoneAbbr = $('<span />', {'class': 'ftz-zoneAbbr'});
 
-        // TODO: generate this placeholder + size as appropriate to the date format
-        this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}).attr('size', 9); 
-        this._timeInput = $('<input />', {'type': 'text', 'class': 'ftz-time_input', 'placeholder': '09:00'}).attr('size', 5);
+        this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}); 
+        this._timeInput = $('<input />', {'type': 'text', 'class': 'ftz-time_input', 'placeholder': '09:00'});
         this._timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'})._offset();
         this._timeZoneOffset.on('change', function() {self._pushChanges();});
-
-        //this._timeZoneOffset = _timeZoneOffset.data('ftz-_offset');
 
         this._dstIndicator = $('<td />');
 
@@ -259,9 +258,9 @@ $.widget("ftz._timezoneRow", {
         this._timeZoneOffset._offset('offsets', this._getValidOffsets());
         this._timeZoneOffset._offset('choose', localDatetime.format('Z'));
 
-        //self._dstComment.addClass('ftz-loading');
+        self._dstIndicator.addClass('ftz-dstloading');
         setTimeout(function() {
-            //self._dstComment.removeClass('ftz-loading');
+            self._dstIndicator.removeClass('ftz-dstloading');
             self._dstIndicator._dstIndicator(DST.getNextDSTEvent(localDatetime));
         }, 1);
 
@@ -297,7 +296,6 @@ $.widget("ftz._timezoneRow", {
         if (!DST.timeExists(date_string, tz, date_format)) {
             this.element.addClass('ftz-invalid');
             this.element.effect('highlight', {color: '#FF4D4D'}, 450);
-            this._dstComment.text('This time does not exist in this time zone.');
             return;
         }
 
@@ -322,8 +320,8 @@ $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
         this.element.addClass(this._getClass());
         this.element.append($('<td />', {'class': 'ftz-rowControlHolder'}).append(this._getControls()))
                     .append($('<td />', {'class': 'ftz-rowInfo ftz-rowName'}).append(this._cityName))
-                    .append($('<td />', {'class': 'ftz-rowInfo', 'colspan': 4}).append(this._unixtimeInput)
-                        .append($('<span />', {'class': 'ftz-unixsplanation', 'text': 'sec. since epoch'})));
+                    .append($('<td />', {'class': 'ftz-unixtime', 'colspan': 2}).append(this._unixtimeInput))
+                    .append($('<td />', {'class': 'ftz-rowInfo', 'colspan': 2}).append($('<span />', {'class': 'ftz-unixsplanation', 'text': 'seconds'})));
 
         var self = this;
         this._unixtimeInput.change(function() {

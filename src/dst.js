@@ -106,14 +106,19 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
     // https://github.com/moment/moment-timezone/issues/11
     // https://github.com/moment/moment-timezone/pull/25
     var a = moment.utc(timeString);
-	var newMoment = moment.utc('1970-01-01 00:00:00')
-				   		  .tz(timeZone)
-						  .year(a.year())
-						  .month(a.month())
-						  .date(a.date())
-						  .hour(a.hour())
-						  .minute(a.minute())
-				 		  .second(a.second());
+	var newMoment = moment.utc('1970-01-01 00:00:00');
+				   	newMoment.tz(timeZone);
+				    newMoment.year(a.year());
+				    newMoment.month(a.month());
+					newMoment.date(a.date());
+					newMoment.hour(a.hour());
+
+					// Sometimes adding the hour component can make the day skip ahead by one.
+					// This probably means there are edge cases ALL OVER THE PLACE.
+					newMoment.date(a.date());
+
+					newMoment.minute(a.minute());
+				 	newMoment.second(a.second());
 
 	// OH GOD none of this should be necessary D:
 	// This _should_ cope with any DST shift fuckupery in multiples of 10 (hopefully only 60 or 30 minute shifts exist)
@@ -132,7 +137,7 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
 	}
 
 	if (newMoment.format('YYYY-MM-DD HH:mm:ss') !== timeString) {
-    	throw new Error('Despite our best efforts, moment.js resulted in a date mismatch:' + newMoment.format('YYYY-MM-DD HH:mm:ss') + ' did not match ' + timeString);
+    	throw new Error('Despite our best efforts, moment.js resulted in a date mismatch:' + newMoment.format('YYYY-MM-DD HH:mm:ss') + ' did not match ' + timeString + ' in time zone ' + timeZone);
     }
 
     return newMoment;
