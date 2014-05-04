@@ -402,7 +402,6 @@ $.widget('ftz._dstIndicator', {
         }
         else {
             this.element.addClass('ftz-nodst');
-            // this._daysFromNow.text('No DST');
         }
         this.element.append(this._direction);
         this.element.append(this._daysFromNow);
