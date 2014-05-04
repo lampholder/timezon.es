@@ -44,19 +44,13 @@ $.widget("ftz.timezoneTable", {
         self.moment(moment()); // Initialise the internal unixtime representation of now to now
 
         this.element.addClass('ftz-table')
-             .append('<tfoot><tr><td class="ftz-rowControlHolder"></td><td id=\'ftz-add_city\' class=\'ftz-rowName\'></td><td></td><td></td><td></td></tr></tfoot>');
+             .append('<tfoot><tr><td class="ftz-rowControlHolder"></td><td id=\'ftz-add_city\' class=\'ftz-rowName\'></td><td></td><td colspan=3></td></tr></tfoot>');
         var addCityCell = this.element.find('#ftz-add_city');
         var tableHead = this.element.first('thead');
 
         var browserLocalTimeRow = $('<tr />');
         tableHead.append(browserLocalTimeRow);
         browserLocalTimeRow._localBrowserTimezoneRow(); 
-
-        /*
-        var unixtimeRow = $('<tr />');
-        tableHead.append(unixtimeRow);
-        unixtimeRow._unixtimeRow();
-        */ 
 
         var selector = $('<span/>', {'id': 'ftz-selector', 'width': '100%'});
         addCityCell.append(selector);
@@ -75,7 +69,11 @@ $.widget("ftz.timezoneTable", {
                 if (query.term) {
                     return results.sort(function (city1, city2) {
                         // Type 'SEA' - 'Seattle' should come before 'Swansea'
-                        return city1.name.toLowerCase().indexOf(query.term.toLowerCase()) - city2.name.toLowerCase().indexOf(query.term.toLowerCase());
+                        var nameDiff = city1.name.toLowerCase().indexOf(query.term.toLowerCase()) - city2.name.toLowerCase().indexOf(query.term.toLowerCase());
+                        if (nameDiff === 0) {
+                            return city2.population - city1.population;
+                        }
+                        return nameDiff;
                     });
                 }
              }
@@ -89,23 +87,35 @@ $.widget("ftz.timezoneTable", {
         });
 
         $.each(this.options.cities, function(index, value) {
-            self._addRow(value);
+            self.addRow(value, true);
         });
         delete this.options.cities; // Don't access this again.
     },
     cities: function() {
-        return this.element.find('.ftz-nonlocal').map(function(index, element) {return $(element)._timezoneRow('city');}).toArray();
+        return this.element.find('.ftz-nonlocal').map(function(index, element) {
+            if ($(element).data('ftz-_timezoneRow') !== undefined) {
+                return $(element)._timezoneRow('city');
+            }
+            else if ($(element).data('ftz-_unixtimeRow') !== undefined) {
+                return $(element)._unixtimeRow('city');
+            }
+        }).toArray();
     },
-    addRow: function(city) {
-        var newRow = this._addRow(city);
-        this.element.trigger('citieschanged', [city, this.cities()]);
-        return newRow;
-    },
-    _addRow: function(city) {
+    addRow: function(city, suppressEvent) {
         var newRow = $('<tr />');
         this.element.append(newRow);
-        var timezoneRow = newRow._timezoneRow({'city': city});
-        return newRow;        
+
+        // TODO: Must be able to find a better way of special-casing this
+        if (city.name === 'Unix time') {
+            newRow._unixtimeRow();
+        }
+        else {
+            newRow._timezoneRow({'city': city});
+        }
+        if (suppressEvent != true) {
+            this.element.trigger('citieschanged', [city, this.cities()]);
+        }
+        return newRow;
     },
     moment: function(value) {
         if (undefined === value) {
@@ -131,6 +141,8 @@ $.widget("ftz._timezoneRow", {
         var self = this;
 
         this._cityName = $('<span />', {'class': 'ftz-city_name'});
+        this._cityName.html(this._getCityName());
+
         this._zoneAbbr = $('<span />', {'class': 'ftz-zoneAbbr'});
 
         // TODO: generate this placeholder + size as appropriate to the date format
@@ -230,17 +242,23 @@ $.widget("ftz._timezoneRow", {
         return '<em>' + city.name + '</em> (' + city.tz + ')';
     },
     refresh: function() {
-        this._cityName.html(this._getCityName());
+        var self = this;
+
         var localDatetime = this.getLocalDatetime();
 
-        this._zoneAbbr.text(localDatetime.format('z'));
+        var zoneAbbr = localDatetime.format('z');
+        if (zoneAbbr === 'GMT/BST') {
+            // Peculiar need for special-casing - there could be lots of examples of this, but I live in the UK
+            //  so this was particularly noticable :\
+            zoneAbbr = localDatetime.isDST() ? 'BST' : 'GMT';
+        }
+        this._zoneAbbr.text(zoneAbbr);
 
         this._dateInput.val(localDatetime.format(this._ftz().options.dateFormat));
         this._timeInput.val(localDatetime.format(this._ftz().options.timeFormat));
         this._timeZoneOffset._offset('offsets', this._getValidOffsets());
         this._timeZoneOffset._offset('choose', localDatetime.format('Z'));
 
-        var self = this;
         //self._dstComment.addClass('ftz-loading');
         setTimeout(function() {
             //self._dstComment.removeClass('ftz-loading');
@@ -296,22 +314,57 @@ $.widget("ftz._timezoneRow", {
 
 $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
     _getCityName: function() {
-        return '<em>Unixtime</em>';
+        return '<em>UNIX time</em> (UTC)';
     },
+    _render: function() {
+        this._unixtimeInput = $('<input />', {'type': 'text', 'class': 'ftz-unixtime_input'});
+        this.element.addClass('ftz-row');
+        this.element.addClass(this._getClass());
+        this.element.append($('<td />', {'class': 'ftz-rowControlHolder'}).append(this._getControls()))
+                    .append($('<td />', {'class': 'ftz-rowInfo ftz-rowName'}).append(this._cityName))
+                    .append($('<td />', {'class': 'ftz-rowInfo', 'colspan': 4}).append(this._unixtimeInput)
+                        .append($('<span />', {'class': 'ftz-unixsplanation', 'text': 'sec. since epoch'})));
+
+        var self = this;
+        this._unixtimeInput.change(function() {
+            var newTime = moment.unix(self._unixtimeInput.val());
+            self._ftz().moment(newTime);
+        });
+    },
+    refresh: function() {
+        var self = this;
+
+        this._unixtimeInput.val(this._ftz().moment().unix());
+        return this;
+    },
+    city: function() {
+        // TODO: this isn't right
+        return {
+            "id": "U1",
+            "name": "Unix time",
+            "tz": "Etc/UTC",
+            "country": null,
+            "population": null
+        }
+    },
+    _getClass: function() {
+        return 'ftz-nonlocal';
+    },
+    _getControls: function() {
+        return null;
+    },
+    getLocalDatetime: function() {
+        return this.moment();
+    },
+    _getValidOffsets: function() {
+        return [];
+    }
 });
 
 $.widget("ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
     getLocalDatetime: function() {
         return this.moment().local();
     },
-    /*
-    _pushChanges: function() {
-        var date_string = this._dateInput.val() + ' ' + this._timeInput.val();
-        var date_format = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
-        var new_moment = moment(date_string, date_format);
-        this._ftz().moment(new_moment);
-    },
-    */
     _getClass: function() {
         return 'ftz-local';
     },

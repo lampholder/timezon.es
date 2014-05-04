@@ -155,6 +155,7 @@ for i in range(0, len(generics)):
     structured['population'] = None
     cities.append(structured)
 
+# TODO: actually include these, plus include the fake unix city somehow
 edgecaseville = [('Lord Howe Island', 'Australia/Lord_Howe'),
                  ('Eucla', 'Australia/Eucla')]
 

@@ -37,7 +37,12 @@ input[type="text"].ftz-time_input {
     width: 5ch;
 }
 
-input[type="text"].ftz-date_input, input[type="text"].ftz-time_input {
+input[type="text"].ftz-unixtime_input {
+    width: 10ch;
+    text-align: right;
+}
+
+input[type="text"].ftz-date_input, input[type="text"].ftz-time_input, input[type="text"].ftz-unixtime_input {
     font-size: medium;
     font-family: monospace;
     padding-left: 4px;
@@ -104,6 +109,13 @@ span.ftz-zoneAbbr {
     font-family: monospace;
     color: darkgrey;
     padding-right: 20px;
+}
+
+span.ftz-unixsplanation {
+    font-family: monospace;
+    color: darkgrey;
+    padding-right: 20px;
+    padding-left: 8px;
 }
 
 /* I haven't thought about any of the stuff below. */
