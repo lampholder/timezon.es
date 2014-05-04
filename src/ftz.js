@@ -303,7 +303,7 @@ $.widget("ftz._timezoneRow", {
 
         var ambiguity = DST.timeIsAmbiguous(date_string, tz, date_format);
         if (ambiguity) {
-            this._ftz().moment(moment(date_string + ' ' + this._timeZoneOffset.val()));
+            this._ftz().moment(moment(date_string + ' ' + this._timeZoneOffset._offset('val')));
             return;
         }
 
