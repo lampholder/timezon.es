@@ -123,11 +123,11 @@ span.ftz-unixsplanation {
     padding-left: 2px;
 }
 
-/* I haven't thought about any of the stuff below. */
-
-.ftz-invalid {
+tr.ftz-invalid {
     background-color: #FFE6E6;
 }
+
+/* I haven't thought about any of the stuff below. */
 
 div.ui-datepicker{
     font-size: 11px;
