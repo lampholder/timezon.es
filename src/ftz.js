@@ -178,18 +178,23 @@ $.widget("ftz._remoteTimezoneRow", $.ftz._timezoneRow, {
         city: undefined
     },
     _render: function() {
+        var self = this;
         this._zoneAbbr = $('<span />', {'class': 'ftz-zoneAbbr'});
 
         this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}); 
         this._timeInput = $('<input />', {'type': 'text', 'class': 'ftz-time_input', 'placeholder': '09:00'});
         this._timeZoneOffset = $('<span />', {'class': 'ftz-tz_offset'})._offset();
-        this._timeZoneOffset.on('change', function() {self._pushChanges();});
+        this._timeZoneOffset.on('change', function() {
+            self._pushChanges();
+        });
 
         this._dstIndicator = $('<td />');
 
         // For fuck's sake - datepicker and timezone-js's date format strings don't match up.
         this._dateInput.datepicker({ dateFormat: 'yy-mm-dd' }); //this._ftz().options.dateFormat
-        this._dateInput.change(function() {self._pushChanges();});
+        this._dateInput.change(function() {
+            self._pushChanges();
+        });
 
         var source = function(){
             var times = [];
@@ -320,6 +325,8 @@ $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
         return '<em>UNIX time</em> (UTC)';
     },
     _render: function() {
+        var self = this;
+
         this._unixtimeInput = $('<input />', {'type': 'text', 'class': 'ftz-unixtime_input'});
         this.element.addClass('ftz-row');
         this.element.addClass(this._getClass());
@@ -328,7 +335,6 @@ $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
                     .append($('<td />', {'class': 'ftz-unixtime', 'colspan': 2}).append(this._unixtimeInput))
                     .append($('<td />', {'class': 'ftz-rowInfo', 'colspan': 2}).append($('<span />', {'class': 'ftz-unixsplanation', 'text': 'seconds'})));
 
-        var self = this;
         this._unixtimeInput.change(function() {
             var newTime = moment.unix(self._unixtimeInput.val());
             self._ftz().moment(newTime);
