@@ -110,7 +110,7 @@ $.widget("ftz.timezoneTable", {
             newRow._unixtimeRow();
         }
         else {
-            newRow._timezoneRow({'city': city});
+            newRow._remoteTimezoneRow({'city': city});
         }
         if (suppressEvent != true) {
             this.element.trigger('citieschanged', [city, this.cities()]);
@@ -129,10 +129,7 @@ $.widget("ftz.timezoneTable", {
 });
 
 $.widget("ftz._timezoneRow", {
-    options: {
-        city: undefined
-    },
-    _init: function() {
+    _init: function() {        
         var self = this;
 
         if (this.element.prop('tagName').toLowerCase() !== 'tr' ) {
@@ -145,6 +142,42 @@ $.widget("ftz._timezoneRow", {
         this._cityName = $('<span />', {'class': 'ftz-city_name'});
         this._cityName.html(this._getCityName());
 
+        this._render();
+
+        this._ftz().element.on('timechanged', function() {
+            self.refresh();
+        });
+
+        this.refresh();
+
+        return this;
+    },
+    _getControls: function() {
+        var self = this;
+        // Controls
+        var _delete = $('<span />', {'class': 'ftz-rowControl', 'text': 'X'}).on('click', function() {
+            var deletedCity = self.city();
+            var ftz = self._ftz();
+            self.element.remove();
+            // TODO: Make this event spec. less weird
+            ftz.element.trigger('citieschanged', [deletedCity, ftz.cities()]); // This is a weirdly-specified event
+        });
+
+        return _delete;
+    },
+    moment: function() {
+        return this._ftz().moment();
+    },
+    _ftz: function() {
+        return this.element.closest('table').data('ftz-timezoneTable');
+    }
+});
+
+$.widget("ftz._remoteTimezoneRow", $.ftz._timezoneRow, {
+    options: {
+        city: undefined
+    },
+    _render: function() {
         this._zoneAbbr = $('<span />', {'class': 'ftz-zoneAbbr'});
 
         this._dateInput = $('<input />', {'type': 'text', 'class': 'ftz-date_input', 'placeholder': '1970-01-01'}); 
@@ -185,16 +218,7 @@ $.widget("ftz._timezoneRow", {
             self._timeInput.autocomplete('search', '');
         });
 
-        this._render();
 
-        this._ftz().element.on('timechanged', function() {
-            self.refresh();
-        });
-
-        this.refresh();
-        return this;
-    },
-    _render: function() {
         this.element.addClass('ftz-row');
         this.element.addClass(this._getClass());
         this.element.append($('<td />', {'class': 'ftz-rowControlHolder'}).append(this._getControls()))
@@ -207,19 +231,6 @@ $.widget("ftz._timezoneRow", {
     },
     _getClass: function() {
         return 'ftz-nonlocal';
-    },
-    _getControls: function() {
-        var self = this;
-        // Controls
-        var _delete = $('<span />', {'class': 'ftz-rowControl', 'text': 'X'}).on('click', function() {
-            var deletedCity = self.city();
-            var ftz = self._ftz();
-            self.element.remove();
-            // TODO: Make this event spec. less weird
-            ftz.element.trigger('citieschanged', [deletedCity, ftz.cities()]); // This is a weirdly-specified event
-        });
-
-        return _delete;
     },
     city: function(value) {
         if (undefined === value) {
@@ -278,12 +289,6 @@ $.widget("ftz._timezoneRow", {
             return ambiguity;
         }
         else return [localDatetime.format('Z')];
-    },
-    moment: function() {
-        return this._ftz().moment();
-    },
-    _ftz: function() {
-        return this.element.closest('table').data('ftz-timezoneTable');
     },
     _getTimezone: function() {
         return this.city() && this.city().tz;
@@ -348,9 +353,6 @@ $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
     _getClass: function() {
         return 'ftz-nonlocal';
     },
-    _getControls: function() {
-        return null;
-    },
     getLocalDatetime: function() {
         return this.moment();
     },
@@ -359,7 +361,7 @@ $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
     }
 });
 
-$.widget("ftz._localBrowserTimezoneRow", $.ftz._timezoneRow, {
+$.widget("ftz._localBrowserTimezoneRow", $.ftz._remoteTimezoneRow, {
     getLocalDatetime: function() {
         return this.moment().local();
     },

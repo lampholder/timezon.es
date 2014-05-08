@@ -3,6 +3,22 @@ TIMEZONES = {};
 (function(){
 'use strict'
 
+    TIMEZONES.trimArray = function(arrayToTrim) {
+        var clone = arrayToTrim.slice(0);
+
+        var start = clone[0];
+        while (!start && clone.length > 0) {
+            clone.shift();
+            start = clone[0];
+        }
+        var finish = clone[clone.length - 1];
+        while (!finish && clone.length > 0) {
+            clone.pop();
+            finish = clone[clone.length - 1];
+        }
+        return clone;
+    }
+
     TIMEZONES.getParameterByName = function(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regexS = "[\\?&]" + name + "=([^&#]*)";
@@ -11,68 +27,61 @@ TIMEZONES = {};
         return results && decodeURIComponent(results[1].replace(/\+/g, " ")) || '';
     };
 
-    TIMEZONES.getSetupFromUrl = function() {
-        var entities = decodeURI(window.location.pathname).split('/');
-        entities.shift(); // Remove the first, empty element
-        if (entities.length < 3) {
-            return false;
-        }
-        var primaryCityString = entities.shift();
-        var timeInPrimaryCityString = entities.shift();
-        var secondaryCitiesStrings = entities;
-
-
-        var primaryCityMatch = CITY.findCitiesByName(primaryCityString);
-        if (primaryCityMatch.length > 1) {
-            throw "Primary city not uniquely defined";
-            //TODO: support unique specification by tz
-        }
-        var primaryCity = primaryCityMatch[0];
-
-        var secondaryCityMatch = CITY.findCitiesByName(secondaryCitiesStrings[0]);
-        if (secondaryCityMatch.length > 1) {
-            throw "Secondary city not uniquely defined";
-            //TODO: Support unique id by tz + multiple secondary cities
-        }
-        var secondaryCity = secondaryCityMatch[0];
-
-        var dateTimeRegex = RegExp(/^\d{4}-\d{2}-\d{2}T\d{2}:?\d{2}$/);
-        var timeRegex = RegExp(/^\d{1,2}:?\d{2}$/);
-
-        if (dateTimeRegex.test(timeInPrimaryCityString)) {
-            var time = DST.createTimeInTimezone(timeInPrimaryCityString.replace('T', ' ') + ':00', primaryCity.tz).local();
-            return {'cities': [primaryCity, secondaryCity], 'time': time};
-        }
-        else if (timeRegex.test(timeInPrimaryCityString)) {
-            time = DST.createTimeInTimezone(moment().format('YYYY-MM-DD') + ' ' + timeInPrimaryCityString + ':00', primaryCity.tz).local();
-            return {'cities': [primaryCity, secondaryCity], 'time': time};
-        }
-        else throw "Date/time incorrectly formatted";
-
-
+    TIMEZONES.getArrayFromURL = function() {
+        var urlComponents = decodeURI(window.location.pathname).split('/');
+        return TIMEZONES.trimArray(urlComponents);        
     };
 
-    $(window).load(function () {
-        $(function() {
-            var fromURL = TIMEZONES.getSetupFromUrl();
-            if(fromURL) {
-                $('#test').timezoneTable({'cities': fromURL.cities});
-                $('#test').timezoneTable('moment', fromURL.time);
+    TIMEZONES.getDateTimeFromDateTimeField = function(dateTimeField, timezone) {
+        var dateTimeRegex = RegExp(/^(\d{4}-\d{2}-\d{2}).(\d{2}):?(\d{2})$/);
+        var timeRegex = RegExp(/^(\d{1,2})[:.]?(\d{2})$/);
+
+        if (dateTimeRegex.test(dateTimeField)) {
+            var componentArray = dateTimeRegex.exec(dateTimeField);
+            var dateTime = componentArray[1] + ' ' + componentArray[2] + ':' + componentArray[3] + ':00';
+            return DST.createTimeInTimezone(dateTime, timezone);
+        }
+        else if (timeRegex.test(dateTimeField)) {
+            var componentArray = timeRegex.exec(dateTimeField);
+            return moment().tz(timezone).hour(componentArray[1]).minute(componentArray[2]).second(0);
+        }
+        else return undefined;
+    }
+
+    TIMEZONES.getSetupFromURL = function(urlComponents) {
+        var urlComponents = urlComponents.slice(0);
+
+        if (urlComponents.length < 3) {
+            return false;
+        }
+
+        var parseCity = function(cityString) {
+            var city =  { 'cityName': cityString.split(',')[0],
+                          'country': cityString.split(',')[1] };
+            var matches = CITY.findCitiesByName(city.cityName);
+            if (matches.length === 1) return matches[0];
+            if (matches.length > 1) {
+                for (var i = 0; i < matches.length; i++) {
+                    if (city.country === matches[i].country) {
+                        return matches[i];
+                    }
+                }
             }
-            else {
-                var cities = JSON.parse($.cookie('cities') || "[]");
-                $('#test').timezoneTable({'cities': cities});
-            }
+            return undefined;
+        }
 
+        var primaryCity = parseCity(urlComponents.shift());
 
-            //$('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
+        var timeInPrimaryCity = TIMEZONES.getDateTimeFromDateTimeField(urlComponents.shift(), primaryCity.tz);
 
-            //$('#test').timezoneTable('moment', moment('2001-01-01 20:15').tz('America/Los_Angeles'));
-            $('#test').on('citieschanged', function (e, city, cities) {
-                $.cookie('cities', JSON.stringify(cities));
-            });
-        });
-    });
+        var secondaryCityList = [];
+        while (urlComponents.length > 0) {
+            secondaryCityList.push(parseCity(urlComponents.shift()));
+        }
+
+        return {'cities': [primaryCity].concat(secondaryCityList), 'time': timeInPrimaryCity};
+
+    };
 
 })();
 
