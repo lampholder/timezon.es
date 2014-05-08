@@ -56,6 +56,7 @@ TIMEZONES = {};
         }
 
         var parseCity = function(cityString) {
+            cityString = cityString.replace('+', ' ').replace('_', ' ');
             var city =  { 'cityName': cityString.split(',')[0],
                           'country': cityString.split(',')[1] };
             var matches = CITY.findCitiesByName(city.cityName);
