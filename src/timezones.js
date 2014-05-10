@@ -43,7 +43,9 @@ TIMEZONES = {};
         }
         else if (timeRegex.test(dateTimeField)) {
             var componentArray = timeRegex.exec(dateTimeField);
-            return moment().tz(timezone).hour(componentArray[1]).minute(componentArray[2]).second(0);
+            var newMoment = moment();
+            newMoment.tz(timezone); // newMoment.tz(null) returns undefined :(
+            return newMoment.hour(componentArray[1]).minute(componentArray[2]).second(0);
         }
         else return undefined;
     }
