@@ -71,16 +71,19 @@ TIMEZONES = {};
             return undefined;
         }
 
-        var primaryCity = parseCity(urlComponents.shift());
-
-        var timeInPrimaryCity = TIMEZONES.getDateTimeFromDateTimeField(urlComponents.shift(), primaryCity.tz);
-
-        var secondaryCityList = [];
+        var cityList = [];
+        var timezoneOfPreviousCity = null;
         while (urlComponents.length > 0) {
-            secondaryCityList.push(parseCity(urlComponents.shift()));
-        }
+            var field = urlComponents.shift();
+            var time = TIMEZONES.getDateTimeFromDateTimeField(field, timezoneOfPreviousCity);
+            if (!time) {
+                var city = parseCity(field);
+                cityList.push(city);
+                timezoneOfPreviousCity = city.tz;
+            }
+        }   
 
-        return {'cities': [primaryCity].concat(secondaryCityList), 'time': timeInPrimaryCity};
+        return {'cities': cityList, 'time': time};
 
     };
 
