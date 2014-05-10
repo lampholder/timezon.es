@@ -78,8 +78,11 @@ TIMEZONES = {};
         var timezoneOfPreviousCity = null;
         while (urlComponents.length > 0) {
             var field = urlComponents.shift();
-            time = TIMEZONES.getDateTimeFromDateTimeField(field, timezoneOfPreviousCity);
-            if (!time) {
+            var timeExtractedFromField = TIMEZONES.getDateTimeFromDateTimeField(field, timezoneOfPreviousCity);
+            if (timeExtractedFromField) {
+                time = timeExtractedFromField;
+            }
+            else {
                 var city = parseCity(field);
                 cityList.push(city);
                 timezoneOfPreviousCity = city.tz;
