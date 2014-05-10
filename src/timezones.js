@@ -50,8 +50,9 @@ TIMEZONES = {};
 
     TIMEZONES.getSetupFromURL = function(urlComponents) {
         var urlComponents = urlComponents.slice(0);
+        var time = undefined;
 
-        if (urlComponents.length < 3) {
+        if (urlComponents.length == 0) {
             return false;
         }
 
@@ -75,13 +76,15 @@ TIMEZONES = {};
         var timezoneOfPreviousCity = null;
         while (urlComponents.length > 0) {
             var field = urlComponents.shift();
-            var time = TIMEZONES.getDateTimeFromDateTimeField(field, timezoneOfPreviousCity);
+            time = TIMEZONES.getDateTimeFromDateTimeField(field, timezoneOfPreviousCity);
             if (!time) {
                 var city = parseCity(field);
                 cityList.push(city);
                 timezoneOfPreviousCity = city.tz;
             }
-        }   
+        }
+
+        if (!time) time = moment();
 
         return {'cities': cityList, 'time': time};
 
