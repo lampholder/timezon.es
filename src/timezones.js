@@ -38,7 +38,7 @@ TIMEZONES = {};
 
         if (dateTimeRegex.test(dateTimeField)) {
             var componentArray = dateTimeRegex.exec(dateTimeField);
-            var hour = componentArray[2] ? componentArray[2].length == 2 : '0' + componentArray[2];
+            var hour = componentArray[2].length == 2 ? componentArray[2] : '0' + componentArray[2];
             var dateTime = componentArray[1] + ' ' + hour + ':' + componentArray[3] + ':00';
             return DST.createTimeInTimezone(dateTime, timezone);
         }
