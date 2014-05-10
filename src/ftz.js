@@ -377,6 +377,11 @@ $.widget("ftz._localBrowserTimezoneRow", $.ftz._remoteTimezoneRow, {
     getLocalDatetime: function() {
         return this.moment().local();
     },
+    refresh: function() {
+        this._super();
+        // Unlike remote timezones, the local timezone name is the offset from UTC only, and hence is subject to change
+        this._cityName.html(this._getCityName());
+    },
     _getClass: function() {
         return 'ftz-local';
     },
@@ -384,10 +389,10 @@ $.widget("ftz._localBrowserTimezoneRow", $.ftz._remoteTimezoneRow, {
         return null;
     },
     _getCityName: function() {
-        return '<em>Browser local time</em> (UTC ' + moment().format('ZZ') + ')';
+        return '<em>Browser local time</em> (UTC ' + this._ftz().moment().format('ZZ') + ')';
     },
     _getValidOffsets: function() {
-        // TODO: Refactor our the copy pasta; the whole concept of browser-specific/country-specific should be streamlined
+        // TODO: Refactor out the copy pasta; the whole concept of browser-specific/country-specific should be streamlined
         var localDatetime = this.getLocalDatetime();
         var ambiguity = DST.timeIsAmbiguous(localDatetime.format('YYYY-MM-DD HH:mm') + ':00');
         if (ambiguity) {
@@ -403,15 +408,15 @@ $.widget('ftz._dstIndicator', {
     _init: function() {
         this.element.empty();
         var translator = {
-            'BACK': 'Clocks go back in ', //'&#9668;',
-            'FORWARD': 'Clocks go forward in ', //'&#9658;',
+            'BACK': 'Clocks go back ', //'&#9668;',
+            'FORWARD': 'Clocks go forward ', //'&#9658;',
             'NO_DST': ''
         }
         this._direction = $('<span />', {class: 'ftz-dstIndicatorDirection', html: translator[this.options.eventType]});
         
         this._daysFromNow = $('<span />', {class: 'ftz-dstIndicatorDaysFromNow'});
         if (this.options.eventType != 'NO_DST') {
-            this._daysFromNow.text(this._getDaysFromNow() + ' days');
+            this._daysFromNow.text(this._getDaysFromNow() + ' days later');
             this.element.addClass('ftz-dst');
         }
         else {
