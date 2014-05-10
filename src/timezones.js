@@ -33,7 +33,7 @@ TIMEZONES = {};
     };
 
     TIMEZONES.getDateTimeFromDateTimeField = function(dateTimeField, timezone) {
-        var dateTimeRegex = RegExp(/^(\d{4}-\d{2}-\d{2}).(\d{2}):?(\d{2})$/);
+        var dateTimeRegex = RegExp(/^(\d{4}-\d{2}-\d{2}).(\d{1,2}):?(\d{2})$/);
         var timeRegex = RegExp(/^(\d{1,2})[:.]?(\d{2})$/);
 
         if (dateTimeRegex.test(dateTimeField)) {
