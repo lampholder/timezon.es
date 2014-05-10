@@ -24,7 +24,7 @@ $.widget("ftz.timezoneTable", {
             }
             var rowControls = this.element.find('.ftz-rowControlHolder');
             if (mutable) {
-                rowControls.animate({'width': '60px'}, function() {
+                rowControls.animate({'width': '20px'}, function() {
                     rowControls.children().show();
                 });
                 return;
@@ -155,10 +155,16 @@ $.widget("ftz._timezoneRow", {
     _getControls: function() {
         var self = this;
         // Controls
-        var _delete = $('<span />', {'class': 'ftz-rowControl', 'text': 'X'}).on('click', function() {
+        var _delete = $('<span />', {'class': 'ftz-rowControl', 'html': '&#10006;'}).on('click', function() {
             var deletedCity = self.city();
             var ftz = self._ftz();
-            self.element.remove();
+            self.element.find('td')
+                    .wrapInner('<div style="display: block;" />')
+                    .parent()
+                    .find('td > div')
+                    .fadeOut(500, function() {
+                        self.element.remove();
+                    });
             // TODO: Make this event spec. less weird
             ftz.element.trigger('citieschanged', [deletedCity, ftz.cities()]); // This is a weirdly-specified event
         });

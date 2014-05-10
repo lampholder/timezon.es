@@ -98,6 +98,7 @@ td.ftz-nodst {
     width: 22px;
     margin-left: 4px;
     margin-right: 4px;
+    cursor: pointer;
 }
 
 table.ftz-table tfoot tr {

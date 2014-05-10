@@ -13,13 +13,11 @@
                 $('#test').timezoneTable({'cities': cities});
             }
 
-
-            //$('#test').timezoneTable({'cities': [{'name': 'Seattle', 'tz': 'America/Los_Angeles'}, {'name': 'London', 'tz': 'Europe/London'}]});
-
-            //$('#test').timezoneTable('moment', moment('2001-01-01 20:15').tz('America/Los_Angeles'));
             $('#test').on('citieschanged', function (e, city, cities) {
                 $.cookie('cities', JSON.stringify(cities));
             });
+
+            console.log('Fuck timezones ;P');
         });
     });
 
