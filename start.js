@@ -5,15 +5,15 @@
         $(function() {
             var fromURL = TIMEZONES.getSetupFromURL(TIMEZONES.getArrayFromURL());
             if(fromURL) {
-                $('#test').timezoneTable({'cities': fromURL.cities});
-                $('#test').timezoneTable('moment', fromURL.time);
+                $('#timezoneTable').timezoneTable({'cities': fromURL.cities});
+                $('#timezoneTable').timezoneTable('moment', fromURL.time);
             }
             else {
                 var cities = JSON.parse($.cookie('cities') || "[]");
-                $('#test').timezoneTable({'cities': cities});
+                $('#timezoneTable').timezoneTable({'cities': cities});
             }
 
-            $('#test').on('citieschanged', function (e, city, cities) {
+            $('#timezoneTable').on('citieschanged', function (e, city, cities) {
                 $.cookie('cities', JSON.stringify(cities));
             });
 
