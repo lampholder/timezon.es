@@ -64,6 +64,8 @@ CITY.findCitiesByName = function(cityName) {
 };
 """
 
+# TODO: Make this filter/flag/otherwise handle cities with the same name *AND* country (dammit Luoyang).
+
 import argparse
 import collections
 import csv, json

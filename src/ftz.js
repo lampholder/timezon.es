@@ -164,9 +164,8 @@ $.widget("ftz._timezoneRow", {
                     .find('td > div')
                     .fadeOut(500, function() {
                         self.element.remove();
-                    });
-            // TODO: Make this event spec. less weird
-            ftz.element.trigger('citieschanged', [deletedCity, ftz.cities()]); // This is a weirdly-specified event
+                        ftz.element.trigger('citieschanged', [deletedCity, ftz.cities()]); // This is a weirdly-specified event
+                    });            
         });
 
         return _delete;

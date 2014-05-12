@@ -96,6 +96,18 @@ TIMEZONES = {};
 
     };
 
+    TIMEZONES.generateLinkFromSetup = function(setup) {
+        var link = "http://timezon.es/";
+        $(setup).each(function(index, city) {
+            link += city.name;
+            if (CITY.findCitiesByName(city.name).length > 1) {
+                link += ',' + city.country;
+            }
+            link += '/';
+        });
+        return link;
+    };
+
 })();
 
 
