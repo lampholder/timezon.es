@@ -115,7 +115,7 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
 
 					// Sometimes adding the hour component can make the day skip ahead by one.
 					// This probably means there are edge cases ALL OVER THE PLACE.
-					newMoment.date(a.date());
+					newMoment.date(a.date()); // I think this bug was fixed - lesson learned - write tests to tests your bugfixes
 
 					newMoment.minute(a.minute());
 				 	newMoment.second(a.second());
