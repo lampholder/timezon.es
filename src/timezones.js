@@ -99,7 +99,7 @@ TIMEZONES = {};
     TIMEZONES.generateLinkFromSetup = function(setup) {
         var link = "http://timezon.es/";
         $(setup).each(function(index, city) {
-            link += city.name.replace(' ', '_');
+            link += city.name.replace(/ /g, '_');
             if (CITY.findCitiesByName(city.name).length > 1) {
                 link += ',' + city.country;
             }
