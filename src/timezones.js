@@ -106,13 +106,18 @@ TIMEZONES = {};
         return link;
     };
 
+    // This is far from perfect, but should see the table ticking roughly in time with system clock minutes
     TIMEZONES.liveUpdate = function(timezoneTable) {
-        var loop = setInterval(function() {
+        setTimeout(function () {
             timezoneTable.timezoneTable('moment', moment());
-        }, 60000);
-        timezoneTable.on('timeEdited', function() {
-            clearInterval(loop);
-        });
+
+            var loop = setInterval(function() {
+                timezoneTable.timezoneTable('moment', moment());
+            }, 60000);
+            timezoneTable.on('timeEdited', function() {
+                clearInterval(loop);
+            });
+        }, 60000 - (new Date().getSeconds() * 1000));
     };
 
 })();
