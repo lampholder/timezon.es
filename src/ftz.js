@@ -15,6 +15,8 @@ $.widget("ftz.timezoneTable", {
         _mutable: false
     },
     mutable: function(mutable) {
+        var self = this;
+
         if (undefined === mutable) {
             return this._mutable;
         }
@@ -25,12 +27,12 @@ $.widget("ftz.timezoneTable", {
             var rowControls = this.element.find('.ftz-rowControlHolder');
             if (mutable) {
                 rowControls.animate({'width': '20px'}, function() {
-                    rowControls.addClass('visibleControls');
+                    self.element.addClass('visibleControls');
                 });
                 return;
             }
             else {
-                rowControls.removeClass('visibleControls');
+                self.element.removeClass('visibleControls');
                 this.element.find('.ftz-rowControlHolder').animate({'width': '6px'});
                 return;
             }

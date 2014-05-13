@@ -131,11 +131,11 @@ p.quicklink {
     font-size: small;
 }
 
-td span.ftz-rowControl {
+table span.ftz-rowControl {
     display: none;
 }
 
-td.visibleControls span.ftz-rowControl {
+table.visibleControls span.ftz-rowControl {
     display: inline !important;
 }
 
