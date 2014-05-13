@@ -20,6 +20,10 @@
                 $('#quicklink').text(TIMEZONES.generateLinkFromSetup(cities)).attr('href', TIMEZONES.generateLinkFromSetup(cities));
             });
 
+            //setInterval(function() {
+            //    $('#timezoneTable').timezoneTable('moment', moment());
+            //}, 1000);
+
             console.log('Fuck timezones ;P');
         });
     });

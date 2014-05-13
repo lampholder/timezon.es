@@ -78,6 +78,8 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 	if (!(startDate.tz() in DST._cache)) {
 		DST._cache[startDate.tz()] = [];
 	}
+	console.log('Caching dst data of ' + dstEvent.toString() + ' for ' + startDate.tz() + ' between ' + startDate.format() + ' and ' + endDate.format());
+
 	DST._cache[startDate.tz()].push({'start': moment(startDate), 
 									 'end': dstEvent.after ? moment(dstEvent.after) : moment(endDate),
 									 'dstEvent': dstEvent});
