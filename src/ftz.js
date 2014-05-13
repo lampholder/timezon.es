@@ -152,6 +152,9 @@ $.widget("ftz._timezoneRow", {
 
         return this;
     },
+    _pushChanges: function() {
+        this._ftz().element.trigger('timeEdited', this.city(), this.getLocalDatetime());
+    },
     _getControls: function() {
         var self = this;
         // Controls
@@ -304,6 +307,8 @@ $.widget("ftz._remoteTimezoneRow", $.ftz._timezoneRow, {
         return this.city() && this.city().tz;
     },
     _pushChanges: function() {
+        this._super();
+
         var date_string = this._dateInput.val() + ' ' + this._timeInput.val() + ':00';
         var date_format = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
         var tz = this._getTimezone();
@@ -341,9 +346,14 @@ $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
                     .append($('<td />', {'class': 'ftz-rowInfo', 'colspan': 2}).append($('<span />', {'class': 'ftz-unixsplanation', 'text': 'seconds'})));
 
         this._unixtimeInput.change(function() {
-            var newTime = moment.unix(self._unixtimeInput.val());
-            self._ftz().moment(newTime);
+            self._pushChanges();
         });
+    },
+    _pushChanges: function() {
+        this._super();
+
+        var newTime = moment.unix(this._unixtimeInput.val());
+        this._ftz().moment(newTime);
     },
     refresh: function() {
         var self = this;

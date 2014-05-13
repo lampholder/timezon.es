@@ -90,8 +90,6 @@ TIMEZONES = {};
             }
         }
 
-        if (!time) time = moment();
-
         return {'cities': cityList, 'time': time};
 
     };
@@ -106,6 +104,15 @@ TIMEZONES = {};
             link += '/';
         });
         return link;
+    };
+
+    TIMEZONES.liveUpdate = function(timezoneTable) {
+        var loop = setInterval(function() {
+            timezoneTable.timezoneTable('moment', moment());
+        }, 60000);
+        timezoneTable.on('timeEdited', function() {
+            clearInterval(loop);
+        });
     };
 
 })();
