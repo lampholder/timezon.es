@@ -1,5 +1,7 @@
 var DST = {};
 
+DST._cache = {};
+
 DST.getNextDSTEvent = function(startDate, endDate) {
 	"use strict";
 
@@ -19,6 +21,18 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 	}
 	if (iterator.tz() != endDate.tz()) {
 		throw new Error("Start date and end date must be in the same time zone");
+	}
+
+	if (startDate.tz() in DST._cache) {
+		var cached = $.grep(DST._cache[startDate.tz()], function (range, index) {
+			return (   (startDate >= range.start && startDate <= range.end)
+                    && (   (range.dstEvent.eventType === 'NO_DST' && endDate <= range.end)
+						|| (range.dstEvent.eventType !== 'NO_DST' && range.dstEvent.before <= endDate)));
+			});
+		if (cached.length > 0) {
+			console.log('Using cached dst data of ' + cached[0].dstEvent.toString() + ' for ' + startDate.tz() + ' between ' + startDate.format() + ' and ' + endDate.format());
+			return cached[0].dstEvent;
+		}
 	}
 
 	var initialDSTState = iterator.isDST();
@@ -42,8 +56,8 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 		 			'eventType': 'NO_DST', 
 		 			'toString': function() {
 		 				return 'TYPE:[' + this.eventType 
-		 						+ ']; BEFORE:[' + this.before.format() 
-		 						+ ']; AFTER:[' + this.after.format() + '];';}};
+		 						+ ']; BEFORE:[' + (this.before ? this.before.format() : 'null')
+		 						+ ']; AFTER:[' + (this.after ? this.after.format() : 'null') + '];';}};
 
 	if (foundDSTEvent) {
 		// Minutes at which we discover we've switched to/from DST are 0, 1, 30, 31, 60
@@ -59,6 +73,15 @@ DST.getNextDSTEvent = function(startDate, endDate) {
 			return true;
 		});
 	}
+
+	// Prepare cache if empty
+	if (!(startDate.tz() in DST._cache)) {
+		DST._cache[startDate.tz()] = [];
+	}
+	DST._cache[startDate.tz()].push({'start': moment(startDate), 
+									 'end': dstEvent.after ? moment(dstEvent.after) : moment(endDate),
+									 'dstEvent': dstEvent});
+
 	return dstEvent;
 };
 

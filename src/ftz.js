@@ -426,12 +426,14 @@ $.widget('ftz._dstIndicator', {
         this.element.attr('title', this._getDSTComment());
     },
     _getDaysFromNow: function() {
-        var millisBetweenNowAndNextDSTEvent = moment(this.options.before).utc() - this._ftz().moment().utc();
-        var DAY = 24 * 60 * 60 * 1000;
-        return Math.round(millisBetweenNowAndNextDSTEvent/DAY);
+        // This doesn't seem to give the most intuitive results :\
+        return moment(this.options.before).diff(this._row().getLocalDatetime(), 'days');
     },
     _ftz: function() {
         return this.element.closest('table').data('ftz-timezoneTable');
+    },
+    _row: function() {
+        return $(this.element.closest('tr')).tzr();
     },
     _getDSTComment: function() {
         if (this.options.eventType === 'NO_DST') {
