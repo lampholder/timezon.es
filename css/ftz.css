@@ -94,7 +94,6 @@ td.ftz-nodst {
 }
 
 .ftz-rowControl {
-    display: none;
     width: 22px;
     margin-left: 4px;
     margin-right: 4px;
@@ -130,6 +129,14 @@ tr.ftz-invalid {
 
 p.quicklink {
     font-size: small;
+}
+
+td span.ftz-rowControl {
+    display: none;
+}
+
+td.visibleControls span.ftz-rowControl {
+    display: inline !important;
 }
 
 /* I haven't thought about any of the stuff below. */
