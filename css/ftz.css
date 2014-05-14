@@ -136,7 +136,7 @@ table span.ftz-rowControl {
 }
 
 table.visibleControls span.ftz-rowControl {
-    display: inline !important;
+    display: inline;
 }
 
 /* I haven't thought about any of the stuff below. */
