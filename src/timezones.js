@@ -80,7 +80,7 @@ TIMEZONES = {};
         var timeCity = null;
         while (urlComponents.length > 0) {
             var field = urlComponents.shift();
-            var timeExtractedFromField = TIMEZONES.getDateTimeFromDateTimeField(field, previousCity.tz);
+            var timeExtractedFromField = TIMEZONES.getDateTimeFromDateTimeField(field, previousCity ? previousCity.tz : null);
             if (timeExtractedFromField) {
                 time = timeExtractedFromField;
                 timeCity = previousCity;
