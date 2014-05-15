@@ -107,19 +107,25 @@ TIMEZONES = {};
     };
 
     // We're using a timeout rather than an interval so that we can remain in sync with system clock
-    //  even after 
-    TIMEZONES.liveUpdate = function(timezoneTable) {
+    //  even after hibernating, etc.
+    TIMEZONES.liveUpdate = function(timezoneTable, indicator) {
         var self = TIMEZONES.liveUpdate;
         
         var loopFunction = function() {
             timezoneTable.timezoneTable('moment', moment());
             self.loopId = setTimeout(loopFunction, 60000 - (new Date().getSeconds() * 1000));
+            if (undefined !== indicator) {
+                indicator.addClass('live');
+            }
         };
 
         self.loopId = setTimeout(loopFunction, 0);
 
         timezoneTable.on('timeEdited', function() {
             clearTimeout(self.loopId);
+            if (undefined !== indicator) {
+                indicator.removeClass('live');
+            }
             self.loopId = null;
         });
 
