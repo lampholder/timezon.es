@@ -76,32 +76,41 @@ TIMEZONES = {};
         }
 
         var cityList = [];
-        var timezoneOfPreviousCity = null;
+        var previousCity = null;
+        var timeCity = null;
         while (urlComponents.length > 0) {
             var field = urlComponents.shift();
-            var timeExtractedFromField = TIMEZONES.getDateTimeFromDateTimeField(field, timezoneOfPreviousCity);
+            var timeExtractedFromField = TIMEZONES.getDateTimeFromDateTimeField(field, previousCity.tz);
             if (timeExtractedFromField) {
                 time = timeExtractedFromField;
+                timeCity = previousCity;
             }
             else {
                 var city = parseCity(field);
                 cityList.push(city);
-                timezoneOfPreviousCity = city.tz;
+                previousCity = city;
             }
         }
 
-        return {'cities': cityList, 'time': time};
+        return {'cities': cityList, 'time': time, 'timeCity': timeCity};
 
     };
 
-    TIMEZONES.generateLinkFromSetup = function(setup) {
+    TIMEZONES.generateLinkFromSetup = function(cities, specifiedCity, localDateTime) {
         var link = "http://timezon.es/";
-        $(setup).each(function(index, city) {
+        if (specifiedCity === undefined && localDateTime !== undefined) {
+            // browser local time
+            link += localDateTime.format('YYYY-MM-DDTHH:mm') + '/';
+        }
+        $(cities).each(function(index, city) {
             link += city.name.replace(/ /g, '_');
             if (CITY.findCitiesByName(city.name).length > 1) {
                 link += ',' + city.country;
             }
             link += '/';
+            if (specifiedCity && city.id === specifiedCity.id) {
+                link += localDateTime.format('YYYY-MM-DDTHH:mm') + '/';
+            }
         });
         return link;
     };

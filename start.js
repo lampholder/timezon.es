@@ -12,7 +12,8 @@
                 else {
                     TIMEZONES.liveUpdate($('#timezoneTable'));
                 }
-                $('#quicklink').text(TIMEZONES.generateLinkFromSetup(fromURL.cities)).attr('href', TIMEZONES.generateLinkFromSetup(fromURL.cities));
+                var link = TIMEZONES.generateLinkFromSetup(fromURL.cities, fromURL.timeCity, fromURL.time);
+                $('#quicklink').text(link).attr('href', link);
             }
             else {
                 var cities = JSON.parse($.cookie('cities') || "[]");
@@ -26,11 +27,12 @@
                 $('#quicklink').text(TIMEZONES.generateLinkFromSetup(cities)).attr('href', TIMEZONES.generateLinkFromSetup(cities));
             });
 
-            //setInterval(function() {
-            //    $('#timezoneTable').timezoneTable('moment', moment());
-            //}, 1000);
+            $('#timezoneTable').on('timeEdited', function (e, eventData) {
+                var link = TIMEZONES.generateLinkFromSetup($('#timezoneTable').timezoneTable('cities'), eventData.city, eventData.localDateTime);
+                $('#quicklink').text(link).attr('href', link);
+            });
 
-            console.log('Fuck timezones ;P');
+            console.log('Fuck timezones ;)');
         });
     });
 

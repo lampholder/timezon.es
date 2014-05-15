@@ -155,7 +155,7 @@ $.widget("ftz._timezoneRow", {
         return this;
     },
     _pushChanges: function() {
-        this._ftz().element.trigger('timeEdited', this.city(), this.getLocalDatetime());
+        this._ftz().element.trigger('timeEdited', {'city': this.city(), 'localDateTime': this.getLocalDatetime()});
     },
     _getControls: function() {
         var self = this;
@@ -309,8 +309,6 @@ $.widget("ftz._remoteTimezoneRow", $.ftz._timezoneRow, {
         return this.city() && this.city().tz;
     },
     _pushChanges: function() {
-        this._super();
-
         var date_string = this._dateInput.val() + ' ' + this._timeInput.val() + ':00';
         var date_format = this._ftz().options.dateFormat + ' ' + this._ftz().options.timeFormat;
         var tz = this._getTimezone();
@@ -329,6 +327,7 @@ $.widget("ftz._remoteTimezoneRow", $.ftz._timezoneRow, {
 
         this._ftz().moment(DST.createTimeInTimezone(date_string, tz, date_format));
 
+        this._super();
     }
 });
 
@@ -352,10 +351,10 @@ $.widget("ftz._unixtimeRow", $.ftz._timezoneRow, {
         });
     },
     _pushChanges: function() {
-        this._super();
-
         var newTime = moment.unix(this._unixtimeInput.val());
         this._ftz().moment(newTime);
+
+        this._super();
     },
     refresh: function() {
         var self = this;
