@@ -11,6 +11,12 @@ h1 {
     text-decoration: none;
 }
 
+h2 {
+    padding-top: 30px;
+    margin-left: 10px;
+    font-size: 20px;
+}
+
 p {
     margin-left: 10px;
 }
