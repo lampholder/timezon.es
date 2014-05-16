@@ -121,7 +121,10 @@ TIMEZONES = {};
         var self = TIMEZONES.liveUpdate;
         
         var loopFunction = function() {
-            timezoneTable.timezoneTable('moment', moment());
+            var currentTime = moment();
+            currentTime.second(0); // Let's stick to round minutes - this feature shouldn't really be here :(
+
+            timezoneTable.timezoneTable('moment', currentTime);
             self.loopId = setTimeout(loopFunction, 60000 - (new Date().getSeconds() * 1000));
             if (undefined !== indicator) {
                 indicator.addClass('live');
