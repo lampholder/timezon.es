@@ -122,7 +122,7 @@ TIMEZONES = {};
         
         var loopFunction = function() {
             var currentTime = moment();
-            currentTime.second(0); // Let's stick to round minutes - this feature shouldn't really be here :(
+            currentTime.second(0); // Let's stick to round minutes - this feature shouldn be implemented in the timezoneTable model :(
 
             timezoneTable.timezoneTable('moment', currentTime);
             self.loopId = setTimeout(loopFunction, 60000 - (new Date().getSeconds() * 1000));
