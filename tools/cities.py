@@ -95,7 +95,7 @@ cities_file = ZipFile(zipdata).open(filename + '.txt')
 
 with cities_file as csvfile:
     reader = csv.reader(csvfile, delimiter='\t', quoting=csv.QUOTE_NONE)
-    cities = []
+    cities = {}
     for row in reader:
         structured = collections.OrderedDict()  # cosmetic only
         structured['id'] = row[0]
@@ -104,7 +104,9 @@ with cities_file as csvfile:
         structured['country'] = row[8]
         structured['population'] = int(row[14])
         if args.min is None or int(row[14]) >= args.min:
-            cities.append(structured)
+            if row[2] not in cities:
+                cities[row[2]] = []
+            cities[row[2]].append(structured)
 
 generics = [('CET - Central European Time', 'CET'),
             ('CST6CDT', 'CST6CDT'),
@@ -155,13 +157,13 @@ for i in range(0, len(generics)):
     structured['tz'] = tz
     structured['country'] = None
     structured['population'] = None
-    cities.append(structured)
+    if name not in cities:
+        cities[name] = []
+    cities.get(name).append(structured)
 
 # TODO: actually include these, plus include the fake unix city somehow
 edgecaseville = [('Lord Howe Island', 'Australia/Lord_Howe'),
                  ('Eucla', 'Australia/Eucla')]
-
-cities.sort(key=lambda x: x['name'].upper())
 
 print city_js
 print 'CITY.cities = %s' % json.dumps(cities, indent=1, separators=(',', ': '))
