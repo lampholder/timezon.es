@@ -64,7 +64,15 @@ $.widget("ftz.timezoneTable", {
 
         selector = selector.select2(
             {'data': {
-                'results': CITY.cities,
+                'results': function() {
+                    var cityArray = [];
+                    $.each(CITY.cities, function(key, value) {
+                        $.each(value, function(key, value) {
+                            cityArray.push(value);
+                        });
+                    });
+                    return cityArray;
+                }(),
                 'text': function(city) { return city.name; }
              },
              'minimumInputLength': 3,
@@ -456,6 +464,47 @@ $.widget('ftz._dstIndicator', {
             return 'At ' + clocksGoForwardTime.format(dateTimeFormat) + ' local time, clocks in this territory will roll ' + this.options.eventType + ' to ' + this.options.after.format(dateTimeFormat);
         }
     },
+    _timeIcon: function(dstEvent) {
+        var clocks = {'100': '&#x1F550;',
+                      '130': '&#x1F55C;',
+                      '200': '&#x1F551;',
+                      '230': '&#x1F55D;',
+                      '300': '&#x1F552;',
+                      '330': '&#x1F55E;',
+                      '400': '&#x1F553;',
+                      '430': '&#x1F55F;',
+                      '500': '&#x1F554;',
+                      '530': '&#x1F560;',
+                      '600': '&#x1F555;',
+                      '630': '&#x1F561;',
+                      '700': '&#x1F556;',
+                      '730': '&#x1F562;',
+                      '800': '&#x1F557;',
+                      '830': '&#x1F563;',
+                      '900': '&#x1F558;',
+                      '930': '&#x1F564;',
+                     '1000': '&#x1F559;',
+                     '1030': '&#x1F565;',
+                     '1100': '&#x1F55A;',
+                     '1130': '&#x1F566;',
+                     '1200': '&#x1F55B;',
+                     '1230': '&#x1F567;'};
+        var clockwise = '&#8635;'
+        var anticlockwise = '&#x21BA;'
+        var roughTime = parseInt(dstEvent.before.format('hmm'),10);
+        if ((roughTime % 100) < 15) {
+            roughTime = roughTime - (roughTime % 100);
+        }
+        else if ((roughTime % 100) < 45) {
+            roughTime = roughTime - (roughTime % 100) + 30;
+        }
+        else {
+            roughTime = roughTime - (roughTime % 100) + 100;
+            if (roughTime === 1300) roughTime = 100;
+        }
+
+        return $('<span>', {'style': 'font-family: "Lucida Sans Unicode";'}).html('woooo' + clocks[roughTime]);
+    }
 });
 
 $.widget('ftz._offset', {

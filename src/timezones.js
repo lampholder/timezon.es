@@ -63,7 +63,7 @@ TIMEZONES = {};
             cityString = cityString.replace(/[_+]/g, ' ');
             var city =  { 'cityName': cityString.split(',')[0],
                           'country': cityString.split(',')[1] };
-            var matches = CITY.findCitiesByName(city.cityName);
+            var matches = CITY.cities[city.cityName];
             if (matches.length === 1) return matches[0];
             if (matches.length > 1) {
                 for (var i = 0; i < matches.length; i++) {
@@ -104,7 +104,7 @@ TIMEZONES = {};
         }
         $(cities).each(function(index, city) {
             link += city.name.replace(/ /g, '_');
-            if (CITY.findCitiesByName(city.name).length > 1) {
+            if (CITY.cities[city.name].length > 1) {
                 link += ',' + city.country;
             }
             link += '/';
