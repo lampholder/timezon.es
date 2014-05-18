@@ -26,42 +26,6 @@ The main 'geoname' table has the following fields :
 
 city_js = """var CITY = {};
 'use strict';
-
-CITY.findCitiesByName = function(cityName) {
-
-    var minIndex = 0;
-    var maxIndex = this.cities.length - 1;
-    var currentIndex;
-    var currentElement;
-
-    while (minIndex <= maxIndex) {
-        currentIndex = (minIndex + maxIndex) / 2 | 0;
-        currentElement = this.cities[currentIndex];
-
-        if (currentElement.name < cityName) {
-            minIndex = currentIndex + 1;
-        }
-        else if (currentElement.name > cityName) {
-            maxIndex = currentIndex - 1;
-        }
-        else {
-            break;
-        }
-    }
-
-    while (currentIndex >= 1 && this.cities[currentIndex - 1].name == cityName) {
-        currentIndex--;
-    }
-    
-    matchingCities = [];
-    while (this.cities[currentIndex].name == cityName) {
-        matchingCities.push(this.cities[currentIndex]);
-        currentIndex++;
-    }
-
-    return matchingCities;
-
-};
 """
 
 # TODO: Make this filter/flag/otherwise handle cities with the same name *AND* country (dammit Luoyang).
