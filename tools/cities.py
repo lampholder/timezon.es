@@ -147,7 +147,8 @@ generics = [('CET - Central European Time', 'CET'),
             ('GMT-8', 'Etc/GMT-8'),
             ('GMT-9', 'Etc/GMT-9'),
             ('UCT', 'Etc/UCT'),
-            ('UTC', 'Etc/UTC')]
+            ('UTC', 'Etc/UTC'),
+            ('Unix time', 'Etc/UTC')]
 
 for i in range(0, len(generics)):
     structured = collections.OrderedDict()  # cosmetic only
