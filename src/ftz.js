@@ -73,16 +73,29 @@ $.widget("ftz.timezoneTable", {
                     });
                     return cityArray;
                 }(),
-                'text': function(city) { return city.name; }
+                'text': function(city) {
+                    return city.name;
+                }
              },
              'minimumInputLength': 3,
              'placeholder': 'Add a city',
              'dropdownAutoWidth': true,
-             'formatSelection': function(city) { return city.name + ' (' + city.tz + ')'; },
-             'formatResult': function(city) { return city.name + ' (' + city.tz + ')'; },
+             'formatSelection': function(city) {
+                  return city.name + ' (' + city.tz + ')';
+              },
+             'formatResult': function(city) { 
+                  if (city.hasOwnProperty('description')) {
+                     return city.name + ' - ' + city.description + ' (' + city.tz + ')';
+                  }
+                  return city.name + ' (' + city.tz + ')'; 
+              },
              'sortResults': function(results, container, query) {
                 if (query.term) {
                     return results.sort(function (city1, city2) {
+                        // 'EST' should come before 'Esteli', despite its low population
+                        if (city1.name.toLowerCase() === query.term.toLowerCase()) return -Infinity;
+                        if (city2.name.toLowerCase() === query.term.toLowerCase()) return Infinity;
+                        
                         // Type 'SEA' - 'Seattle' should come before 'Swansea'
                         var nameDiff = city1.name.toLowerCase().indexOf(query.term.toLowerCase()) - city2.name.toLowerCase().indexOf(query.term.toLowerCase());
                         if (nameDiff === 0) {
@@ -271,6 +284,9 @@ $.widget("ftz._remoteTimezoneRow", $.ftz._timezoneRow, {
         var city = this.city();
         if (undefined === city) {
             throw Error('This should not happen');
+        }
+        if (city.hasOwnProperty('description')) {
+            return '<em>' + city.name + ' - ' + city.description + '</em> (' + city.tz + ')';
         }
         return '<em>' + city.name + '</em> (' + city.tz + ')';
     },

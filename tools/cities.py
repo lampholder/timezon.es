@@ -72,56 +72,58 @@ with cities_file as csvfile:
                 cities[row[2]] = []
             cities[row[2]].append(structured)
 
-generics = [('CET - Central European Time', 'CET'),
-            ('CST6CDT', 'CST6CDT'),
-            ('EET - Eastern European Time', 'EET'),
-            ('EST - Eastern Standard Time', 'EST'),
-            ('EST5EDT', 'EST5EDT'),
-            ('HST - Hawaii Standard Time', 'HST'),
-            ('MET - Middle European Time', 'MET'),
-            ('MST - Mountain Standard Time', 'MST'),
-            ('MST7MDT', 'MST7MDT'),
-            ('PST8PDT', 'PST8PDT'),
-            ('WET - Western European Time', 'WET'),
-            ('GMT - Greenwich Mean Time', 'Etc/GMT'),
-            ('GMT+1', 'Etc/GMT+1'),
-            ('GMT+10', 'Etc/GMT+10'),
-            ('GMT+11', 'Etc/GMT+11'),
-            ('GMT+12', 'Etc/GMT+12'),
-            ('GMT+2', 'Etc/GMT+2'),
-            ('GMT+3', 'Etc/GMT+3'),
-            ('GMT+4', 'Etc/GMT+4'),
-            ('GMT+5', 'Etc/GMT+5'),
-            ('GMT+6', 'Etc/GMT+6'),
-            ('GMT+7', 'Etc/GMT+7'),
-            ('GMT+8', 'Etc/GMT+8'),
-            ('GMT+9', 'Etc/GMT+9'),
-            ('GMT-1', 'Etc/GMT-1'),
-            ('GMT-10', 'Etc/GMT-10'),
-            ('GMT-11', 'Etc/GMT-11'),
-            ('GMT-12', 'Etc/GMT-12'),
-            ('GMT-13', 'Etc/GMT-13'),
-            ('GMT-14', 'Etc/GMT-14'),
-            ('GMT-2', 'Etc/GMT-2'),
-            ('GMT-3', 'Etc/GMT-3'),
-            ('GMT-4', 'Etc/GMT-4'),
-            ('GMT-5', 'Etc/GMT-5'),
-            ('GMT-6', 'Etc/GMT-6'),
-            ('GMT-7', 'Etc/GMT-7'),
-            ('GMT-8', 'Etc/GMT-8'),
-            ('GMT-9', 'Etc/GMT-9'),
-            ('UCT', 'Etc/UCT'),
-            ('UTC', 'Etc/UTC'),
-            ('Unix time', 'Etc/UTC')]
+generics = [('CET', 'CET', 'Central European Time'),
+            ('CST6CDT', 'CST6CDT', None),
+            ('EET', 'EET', 'Eastern European Time'),
+            ('EST', 'EST', 'Eastern Standard Time'),
+            ('EST5EDT', 'EST5EDT', None),
+            ('HST', 'HST', 'Hawaii Standard Time'),
+            ('MET', 'MET', 'Middle European Time'),
+            ('MST', 'MST', 'Mountain Standard Time'),
+            ('MST7MDT', 'MST7MDT', None),
+            ('PST8PDT', 'PST8PDT', None),
+            ('WET', 'WET', 'Western European Time'),
+            ('GMT', 'Etc/GMT', 'Greenwich Mean Time'),
+            ('GMT+1', 'Etc/GMT+1', None),
+            ('GMT+10', 'Etc/GMT+10', None),
+            ('GMT+11', 'Etc/GMT+11', None),
+            ('GMT+12', 'Etc/GMT+12', None),
+            ('GMT+2', 'Etc/GMT+2', None),
+            ('GMT+3', 'Etc/GMT+3', None),
+            ('GMT+4', 'Etc/GMT+4', None),
+            ('GMT+5', 'Etc/GMT+5', None),
+            ('GMT+6', 'Etc/GMT+6', None),
+            ('GMT+7', 'Etc/GMT+7', None),
+            ('GMT+8', 'Etc/GMT+8', None),
+            ('GMT+9', 'Etc/GMT+9', None),
+            ('GMT-1', 'Etc/GMT-1', None),
+            ('GMT-10', 'Etc/GMT-10', None),
+            ('GMT-11', 'Etc/GMT-11', None),
+            ('GMT-12', 'Etc/GMT-12', None),
+            ('GMT-13', 'Etc/GMT-13', None),
+            ('GMT-14', 'Etc/GMT-14', None),
+            ('GMT-2', 'Etc/GMT-2', None),
+            ('GMT-3', 'Etc/GMT-3', None),
+            ('GMT-4', 'Etc/GMT-4', None),
+            ('GMT-5', 'Etc/GMT-5', None),
+            ('GMT-6', 'Etc/GMT-6', None),
+            ('GMT-7', 'Etc/GMT-7', None),
+            ('GMT-8', 'Etc/GMT-8', None),
+            ('GMT-9', 'Etc/GMT-9', None),
+            ('UCT', 'Etc/UCT', None),
+            ('UTC', 'Etc/UTC', None),
+            ('Unix time', 'Etc/UTC', None)]
 
 for i in range(0, len(generics)):
     structured = collections.OrderedDict()  # cosmetic only
-    (name, tz) = generics[i]
+    (name, tz, description) = generics[i]
     structured['id'] = 'G%d' % i
     structured['name'] = name
     structured['tz'] = tz
     structured['country'] = None
     structured['population'] = None
+    if description is not None:
+        structured['description'] = description
     if name not in cities:
         cities[name] = []
     cities.get(name).append(structured)
