@@ -32,7 +32,7 @@
                 $('#quicklink').text(link).attr('href', link);
             });
 
-            console.log('Fuck timezones ;)');
+            console.log('Seriously, ' + 'flulclk'.replace(/l/g, '') + ' timezones ;)');
         });
     });
 
