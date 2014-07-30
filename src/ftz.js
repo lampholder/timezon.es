@@ -191,7 +191,8 @@ $.widget("ftz._timezoneRow", {
                     .fadeOut(500, function() {
                         self.element.remove();
                         ftz.element.trigger('citieschanged', [deletedCity, ftz.cities()]); // This is a weirdly-specified event
-                    });            
+                    });
+            self._ftz().element.off('timechanged');
         });
 
         return _delete;
