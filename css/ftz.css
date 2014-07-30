@@ -139,6 +139,10 @@ table.visibleControls span.ftz-rowControl {
     display: inline;
 }
 
+.ui-autocomplete.ui-menu {
+    width: 72px;
+}
+
 /* I haven't thought about any of the stuff below. */
 
 div.ui-datepicker{
