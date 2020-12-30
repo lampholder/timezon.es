@@ -222,7 +222,7 @@ $.widget("ftz._remoteTimezoneRow", $.ftz._timezoneRow, {
 
         this._dstIndicator = $('<td />');
 
-        // For fuck's sake - datepicker and timezone-js's date format strings don't match up.
+        // For flip's sake - datepicker and timezone-js's date format strings don't match up.
         this._dateInput.datepicker({ dateFormat: 'yy-mm-dd' }); //this._ftz().options.dateFormat
         this._dateInput.change(function() {
             self._pushChanges();

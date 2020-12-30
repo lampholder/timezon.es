@@ -64,8 +64,8 @@ TIMEZONES = {};
             var city =  { 'cityName': cityString.split(',')[0],
                           'country': cityString.split(',')[1] };
             var matches = CITY.cities[city.cityName];
-            if (matches.length === 1) return matches[0];
-            if (matches.length > 1) {
+            if (matches && matches.length === 1) return matches[0];
+            if (matches && matches.length > 1) {
                 for (var i = 0; i < matches.length; i++) {
                     if (city.country === matches[i].country) {
                         return matches[i];
@@ -97,7 +97,7 @@ TIMEZONES = {};
     };
 
     TIMEZONES.generateLinkFromSetup = function(cities, specifiedCity, localDateTime) {
-        var link = "http://timezon.es/";
+        var link = "https://timezon.es/";
         if (specifiedCity === undefined && localDateTime !== undefined) {
             // browser local time
             link += localDateTime.format('YYYY-MM-DDTHH:mm') + '/';

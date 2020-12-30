@@ -146,7 +146,7 @@ DST.createTimeInTimezone = function(timeString, timeZone, format) {
 				 	newMoment.second(a.second());
 
 	// OH GOD none of this should be necessary D:
-	// This _should_ cope with any DST shift fuckupery in multiples of 10 (hopefully only 60 or 30 minute shifts exist)
+	// This _should_ cope with any DST shift flipupery in multiples of 10 (hopefully only 60 or 30 minute shifts exist)
 	if (newMoment.format('HHmm') != a.format('HHmm')) {
 		var increment = newMoment.format('HHmm') < a.format('HHmm') ? 10 : -10;
 		for (var i = 0; i < 6; i++) {
