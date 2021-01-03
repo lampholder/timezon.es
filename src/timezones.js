@@ -28,7 +28,7 @@ TIMEZONES = {};
     };
 
     TIMEZONES.getArrayFromURL = function() {
-        var urlComponents = decodeURI(window.location.pathname).split('/');
+        var urlComponents = decodeURI(window.location.hash.substr(1)).split('/');
         return TIMEZONES.trimArray(urlComponents);        
     };
 
@@ -97,7 +97,7 @@ TIMEZONES = {};
     };
 
     TIMEZONES.generateLinkFromSetup = function(cities, specifiedCity, localDateTime) {
-        var link = "https://timezon.es/";
+        var link = "https://timezon.es/#/";
         if (specifiedCity === undefined && localDateTime !== undefined) {
             // browser local time
             link += localDateTime.format('YYYY-MM-DDTHH:mm') + '/';
