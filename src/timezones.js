@@ -28,10 +28,7 @@ TIMEZONES = {};
     };
 
     TIMEZONES.getArrayFromURL = function() {
-        var urlComponents = decodeURI(window.location.pathname).split('/');
-        if (urlComponents[0] === '#') {
-            urlComponents.shift();
-        }
+        var urlComponents = decodeURI(window.location.hash.substr(1);).split('/');
         return TIMEZONES.trimArray(urlComponents);        
     };
 
